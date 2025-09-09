@@ -1,7 +1,16 @@
 # Simidemic: An Epidemic Simulator
 
-The title of this simulation will be "Simidemic: An Epidemic Simulator". The goal of this project will be to model and simulate a real-world scenario of disease spread. In addition, infection rates and intervention strategies will be tracked to determine the effectiveness of artificial spread of the disease. 
+“Simidemic: An Epidemic Simulator” falls within the domain of epidemiology and computational modeling. Specifically, it focuses on simulating infectious disease spread within a controlled, virtual population to study dynamics of transmission and intervention strategies.
 
-Determining the effectiveness of disease spread and the strategies to prevent it will allow a better understanding of the real-life strategies used by scientists and physicians. Only a selected random disease will be simulated and it will only be a simple virus. 
+Understanding how infectious diseases spread and how intervention strategies can mitigate outbreaks is critical for public health planning not just locally, but globally. However, real-world experimentation is often impractical, unethical, or even highly unfeasible. Therefore, computational simulations are needed that model disease transmission, evaluate infection rates, and assess the effectiveness of intervention strategies in a controlled environment.
 
-This project does not aim to differentiate the effects between viruses, parasites, fungi, etc. Simulation will also be primarily focused on random spread and clear boundaries based on a compartmental model.
+The simulation will:
+* Model infection dynamics using a compartmental approach (e.g., susceptible, infected, recovered).
+* Track infection rates over time.
+* Evaluate the effectiveness of basic intervention strategies (e.g., isolation, vaccination).
+
+The simulation will not:
+* Differentiate between types of pathogens such as bacteria, parasites, or fungi.
+* Model complex social, environmental, or biological factors beyond random interactions within the population.
+
+By focusing on a simplified virus model, this simulation aims to provide insights into disease propagation and containment strategies, offering a foundation for understanding more complex epidemiological scenarios.
