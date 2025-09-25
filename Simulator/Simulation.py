@@ -1,16 +1,23 @@
 from Population import Population
 from Virus import Virus
+from Intervention import Intervention 
 from EnumeratedTypes import State
+from EnumeratedTypes import InterventionType
 import networkx as nx
 import random
 
+# Main simulation class that runs the epidemic simulation.
+# Tracks the state of the population over time and applies virus dynamics.
+
 class Simulation:
+    # Initialize with a population and a virus.
     def __init__(self, population: Population, virus: Virus):
         self.population = population
         self.virus = virus
         self.time = 0
         self.history = {}
-    
+
+    # Perform a single time step in the simulation.
     def step(self):
         new_infections= []
         for person in self.population.population:
@@ -27,10 +34,12 @@ class Simulation:
         self.track_stats()
         self.time += 1
 
+    # Run the simulation for a specified number of steps.
     def run(self, num_of_steps: int):
         for _ in range (num_of_steps):
             self.step()
-    
+            
+    # Track the number of susceptible, infected, and recovered individuals.
     def track_stats(self):
         counts = {
             "S": sum(1 for p in self.population.population if p.state == State.SUSCEPTIBLE),
@@ -39,17 +48,23 @@ class Simulation:
         }
         self.history[self.time] = counts
 
+# Main execution block to run a sample simulation.
+
 if __name__ == "__main__":
     pop = Population(size = 50)
-    virus = Virus("Virus", infect_rate = 0.2, cure_rate = 0.05)
-    sim = Simulation(pop, virus)
+    vir = Virus("Virus", infect_rate = 0.2, cure_rate = 0.05)
+    sim = Simulation(pop, vir)
 
     patient_zero = random.choice(pop.population)
     patient_zero.infect(time = 0)
 
-    print("Patient zero:", patient_zero.id, "neighbors:", [p.id for p in pop.get_contacts(patient_zero)])
+    ## vaccine = Intervention(InterventionType.VACCINE)
+    ## vaccine.execute(pop)
+
+    quarantine = Intervention(InterventionType.QUARANTINE)
+    quarantine.execute(pop)
 
     sim.run(20)
-
+    # Print the history of the simulation.
     for t, stats in sim.history.items():
         print(f"Time {t}: {stats}")
