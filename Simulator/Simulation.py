@@ -19,7 +19,7 @@ class Simulation:
                     if contact.state == State.SUSCEPTIBLE and random.random() < self.virus.infect_rate:
                         new_infections.append(contact)
                 if random.random() < self.virus.cure_rate:
-                    person.cure()
+                    person.cure(self.time)
 
         for p in new_infections:
             p.infect(self.time)
