@@ -36,13 +36,13 @@ The NetworkX library is required to generate and manage the population contact g
 * In this project, NetworkX was installed directly through the Visual Studio Code terminal, but it can be installed in any IDE or editor that supports Python.
 * If the terminal installation does not work, NetworkX can also be downloaded and unpacked manually.
 
-1. Standard Installation (recommended)
+1.Standard Installation (recommended)
 From a terminal or command prompt, run:
 - pip install networkx
 
 Official installation instructions are available here: https://networkx.org/documentation/stable/install.html
 
-2. Manual Installation (alternative method)
+2.Manual Installation (alternative method)
 If direct installation fails, the package can be downloaded and installed manually:
 * GitHub release page: https://github.com/networkx/networkx/releases
 * PyPI package page: https://pypi.python.org/pypi/networkx
