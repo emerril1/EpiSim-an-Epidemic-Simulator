@@ -3,7 +3,6 @@ from Virus import Virus
 from Intervention import Intervention 
 from EnumeratedTypes import State
 from EnumeratedTypes import InterventionType
-import networkx as nx
 import random
 
 # Main simulation class that runs the epidemic simulation.
@@ -19,7 +18,7 @@ class Simulation:
 
     # Perform a single time step in the simulation.
     def step(self):
-        new_infections= []
+        new_infections = []
         for person in self.population.population:
             if person.state == State.INFECTED:
                 for contact in self.population.get_contacts(person):
@@ -62,8 +61,8 @@ if __name__ == "__main__":
     ## vaccine = Intervention(InterventionType.VACCINE)
     ## vaccine.execute(pop)
 
-    quarantine = Intervention(InterventionType.QUARANTINE)
-    quarantine.execute(pop)
+    ## quarantine = Intervention(InterventionType.QUARANTINE)
+    ## quarantine.execute(pop)
 
     sim.run(20)
 
