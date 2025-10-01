@@ -2,7 +2,7 @@ import networkx as nx
 from Person import Person
 
 # Class representing a population of people and their contact network. 
-# Uses an Erdős-Rényi graph to model random connections between individuals.
+# Uses an Erdős-Rényi graph to model random connections between individuals. e.g. contact patterns.
 
 class Population:
     # Initialize the population with a given size. Create people and a contact network.

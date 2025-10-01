@@ -38,7 +38,7 @@ class Simulation:
     def run(self, num_of_steps: int):
         for _ in range (num_of_steps):
             self.step()
-            
+
     # Track the number of susceptible, infected, and recovered individuals.
     def track_stats(self):
         counts = {
@@ -55,6 +55,7 @@ if __name__ == "__main__":
     vir = Virus("Virus", infect_rate = 0.2, cure_rate = 0.05)
     sim = Simulation(pop, vir)
 
+    # Infect a random individual at the start of the simulation.
     patient_zero = random.choice(pop.population)
     patient_zero.infect(time = 0)
 
@@ -65,6 +66,7 @@ if __name__ == "__main__":
     quarantine.execute(pop)
 
     sim.run(20)
+
     # Print the history of the simulation.
     for t, stats in sim.history.items():
         print(f"Time {t}: {stats}")
