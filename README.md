@@ -61,9 +61,9 @@ From top to bottom in the code:
 * Intervention strategies (currently only Vaccine and Quarantine) can be tested by uncommenting the relevant function calls on lines 61–62 and 64–65.
 * Simulation duration can be set by changing the argument in the run() call on line 67.
 
-Once these parameters are set, the simulator can be executed by clicking Run in any code editor of choice. The output will consist of a line-by-line description of the compartments at each time step. 
+Once these parameters are set, the simulator can be executed by clicking Run in any code editor of choice. The output will consist of a line-by-line description of the compartments at each time step (1 step = 1 day). 
 
-For example: Time 10: {'S': 12, 'I': 33, 'R': 5}
+For example: Day 10: {'S': 12, 'I': 33, 'R': 5}
 
 # Architecture Overview
 

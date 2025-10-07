@@ -62,14 +62,14 @@ if __name__ == "__main__":
     patient_zero = random.choice(pop.population)
     patient_zero.infect(time = 0)
 
-    ## vaccine = Intervention(InterventionType.VACCINE)
-    ## vaccine.execute(pop)
+    # vaccine = Intervention(InterventionType.VACCINE)
+    # vaccine.execute(pop)
 
-    ## quarantine = Intervention(InterventionType.QUARANTINE)
-    ## quarantine.execute(pop)
+    # quarantine = Intervention(InterventionType.QUARANTINE)
+    # quarantine.execute(pop)
 
     sim.run(20)
 
     # Print the history of the simulation.
     for t, stats in sim.history.items():
-        print(f"Time {t}: {stats}")
+        print(f"Day {t}: {stats}")

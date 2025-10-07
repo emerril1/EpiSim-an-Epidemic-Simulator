@@ -21,7 +21,7 @@ class Population:
         self.node_to_person = {i: self.population[i] for i in range(size)}
 
     def get_contacts(self, person: Person):
-         ''' Get the contacts of a given person based on the network.'''
+        ''' Get the contacts of a given person based on the network.'''
         
         idx = self.population.index(person)
         neighbors = self.networkX.neighbors(idx)
