@@ -4,8 +4,8 @@ class State(Enum):
     ''' Different states a person can be in during the simulation. Represents traditional SIER model.'''
     
     SUSCEPTIBLE = auto()
-    INFECTED = auto()
     EXPOSED = auto()
+    INFECTED = auto()
     RECOVERED = auto()
 
 class InterventionType(Enum):

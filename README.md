@@ -57,7 +57,7 @@ Currently, there is no user input functionality in the simulation. As a result, 
 
 From top to bottom in the code:
 * Population size can be adjusted by modifying the size value on line 53.
-* Virus properties, which include the name, infection rate, and cure rate, can be configured by updating the corresponding values on line 54.
+* Virus properties, which include the name, infection rate, and cure rate, and time till infection can be configured by updating the corresponding values on line 54.
 * Intervention strategies (currently only Vaccine and Quarantine) can be tested by uncommenting the relevant function calls on lines 61–62 and 64–65.
 * Simulation duration can be set by changing the argument in the run() call on line 67.
 
@@ -69,7 +69,7 @@ For example: Day 10: {'S': 12, 'I': 33, 'R': 5}
 
 The main components of the simulator consist of six classes and a main program. The classes include: EnumeratedTypes, Virus, Person, Intervention, Population, and Simulation.
 
-The Virus class stores information about the virus, such as its name, infection rate, and cure rate.
+The Virus class stores information about the virus, such as its name, infection rate, and cure rate. The Virus class also now stores a variable that gives the time till infection (e.g. how many days it takes an exposed person to become infected).
 
 The Person class represents an individual in the population. Each person has a unique ID and a health state, along with functions to become infected or cured. Every person begins in the Susceptible state at the start of a simulation.
 
