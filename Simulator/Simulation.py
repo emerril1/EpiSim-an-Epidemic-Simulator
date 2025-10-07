@@ -5,19 +5,21 @@ from EnumeratedTypes import State
 from EnumeratedTypes import InterventionType
 import random
 
-# Main simulation class that runs the epidemic simulation.
-# Tracks the state of the population over time and applies virus dynamics.
-
 class Simulation:
-    # Initialize with a population and a virus.
+    ''' Main simulation class that runs the epidemic simulation.
+        Tracks the state of the population over time and applies virus dynamics.'''
+
     def __init__(self, population: Population, virus: Virus):
+        ''' Initialize with a population and a virus.'''
+        
         self.population = population
         self.virus = virus
         self.time = 0
         self.history = {}
-
-    # Perform a single time step in the simulation.
+        
     def step(self):
+        ''' Perform a single time step in the simulation. Performs specific operations based on state of individual (e.g. cure, infect)'''
+        
         new_infections = []
         for person in self.population.population:
             if person.state == State.INFECTED:
@@ -33,13 +35,15 @@ class Simulation:
         self.track_stats()
         self.time += 1
 
-    # Run the simulation for a specified number of steps.
     def run(self, num_of_steps: int):
+        ''' Run the simulation for a specified number of steps.'''
+        
         for _ in range (num_of_steps):
             self.step()
 
-    # Track the number of susceptible, infected, and recovered individuals.
     def track_stats(self):
+        ''' Track the number of susceptible, infected, and recovered individuals.'''
+        
         counts = {
             "S": sum(1 for p in self.population.population if p.state == State.SUSCEPTIBLE),
             "I": sum(1 for p in self.population.population if p.state == State.INFECTED),
@@ -47,9 +51,9 @@ class Simulation:
         }
         self.history[self.time] = counts
 
-# Main execution block to run a sample simulation.
-
 if __name__ == "__main__":
+    ''' Main execution block to run a sample simulation.'''
+    
     pop = Population(size = 50)
     vir = Virus("Virus", infect_rate = 0.2, cure_rate = 0.05)
     sim = Simulation(pop, vir)
