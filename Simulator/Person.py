@@ -17,12 +17,14 @@ class Person:
     
     def infect(self, time: int):
         ''' Function to infect the person, changing their state from susceptible to infected.'''
+        
         if self.state == State.SUSCEPTIBLE:
             self.state = State.INFECTED
             self.infection_time = time
     
     def cure(self, time: int):
-        ''' Function to cure the person, changing their state from infected to recovered. '''
+        ''' Function to cure the person, changing their state from infected to recovered.'''
+        
         if self.state == State.INFECTED:
             self.state = State.RECOVERED
             self.infection_time = time
