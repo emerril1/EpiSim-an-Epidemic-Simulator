@@ -4,6 +4,7 @@ from Intervention import Intervention
 from EnumeratedTypes import State
 from EnumeratedTypes import InterventionType
 import random
+import json
 
 class Simulation:
     ''' Main simulation class that runs the epidemic simulation.
@@ -64,24 +65,36 @@ class Simulation:
         self.history[self.time] = counts
 
 if __name__ == "__main__":
-    ''' Main execution block to run a sample simulation.'''
-    
-    pop = Population(size = 50)
-    vir = Virus("Virus", infect_rate = 0.2, cure_rate = 0.05, infection_time = 3)
-    sim = Simulation(pop, vir)
+    ''' Example of running a simulation with configuration from a JSON file.'''
 
-    # Infect a random individual at the start of the simulation.
-    patient_zero = random.choice(pop.population)
-    patient_zero.infect(time = 0)
+    # Load configuration
+    with open("Simulator/config.json", "r") as f:
+        config = json.load(f)
 
-    # vaccine = Intervention(InterventionType.VACCINE)
-    # vaccine.execute(pop)
+    # Extract parameters
+    pop_size = config["population"]["size"]
+    virus_info = config["virus"]
+    sim_info = config["simulation"]
 
-    quarantine = Intervention(InterventionType.QUARANTINE)
-    quarantine.execute(pop)
+    # Create objects
+    pop = Population(size = pop_size)
+    virus = Virus(
+        name = virus_info["name"],
+        infect_rate = virus_info["infect_rate"],
+        cure_rate = virus_info["cure_rate"],
+        infection_time = virus_info["infection_time"]
+    )
+    sim = Simulation(pop, virus)
 
-    sim.run(30)
+    # Initialize patient zero
+    for _ in range(sim_info["initial_infected"]):
+        patient_zero = random.choice(pop.population)
+        patient_zero.infect(time = 0)
 
-    # Print the history of the simulation.
+    print("Starting simulation...")
+    # Run simulation
+    sim.run(sim_info["steps"])
+
+    # Print results
     for t, stats in sim.history.items():
         print(f"Day {t}: {stats}")

@@ -1,0 +1,10 @@
+{
+  "simulation": { "steps": 50, "initial_infected": 1 },
+  "population": { "size": 50 },
+  "virus": {
+    "name": "T-Virus",
+    "infect_rate": 0.6,
+    "cure_rate": 0.025,
+    "infection_time": 2
+    }
+  }
