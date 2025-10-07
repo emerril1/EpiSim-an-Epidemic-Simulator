@@ -67,16 +67,13 @@ class Simulation:
 if __name__ == "__main__":
     ''' Example of running a simulation with configuration from a JSON file.'''
 
-    # Load configuration
     with open("Simulator/config.json", "r") as f:
         config = json.load(f)
 
-    # Extract parameters
     pop_size = config["population"]["size"]
     virus_info = config["virus"]
     sim_info = config["simulation"]
 
-    # Create objects
     pop = Population(size = pop_size)
     virus = Virus(
         name = virus_info["name"],
@@ -92,7 +89,6 @@ if __name__ == "__main__":
         patient_zero.infect(time = 0)
 
     print("Starting simulation...")
-    # Run simulation
     sim.run(sim_info["steps"])
 
     # Print results
