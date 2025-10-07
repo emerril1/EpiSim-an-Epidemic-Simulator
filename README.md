@@ -5,9 +5,9 @@
 Understanding how infectious diseases spread and how intervention strategies can mitigate outbreaks is critical for public health planning not just locally, but globally. However, real-world experimentation is often impractical, unethical, or even highly unfeasible. Therefore, computational simulations are needed that model disease transmission, evaluate infection rates, and assess the effectiveness of intervention strategies in a controlled environment.
 
 The simulation will:
-* Model infection dynamics using a compartmental approach (e.g., susceptible, infected, recovered).
+* Model infection dynamics using a compartmental approach (e.g., susceptible, exposed, infected, recovered).
 * Track infection rates over time.
-* Evaluate the effectiveness of basic intervention strategies (e.g., isolation, vaccination).
+* Evaluate the effectiveness of basic intervention strategies (e.g., social distancing, vaccination, quarantine).
 
 The simulation will not:
 * Differentiate between types of pathogens such as bacteria, parasites, or fungi.
@@ -53,17 +53,11 @@ This ensures the simulation has all the necessary dependencies to run properly, 
 
 # Usage
 
-Currently, there is no user input functionality in the simulation. As a result, any testing or execution must be hardcoded into the main program.
+You can define all key parameters in a config.json file located in the project root. This file allows you to specify all adjustable parameters, population size, virus characteristics, intervention strategies, and simulation duration without editing the source code. After making sure the config.json file is update and in the correct directory, then simulation can be run through any enviroment/IDE of user's choice.
 
-From top to bottom in the code:
-* Population size can be adjusted by modifying the size value on line 53.
-* Virus properties, which include the name, infection rate, and cure rate, and time till infection can be configured by updating the corresponding values on line 54.
-* Intervention strategies (currently only Vaccine and Quarantine) can be tested by uncommenting the relevant function calls on lines 61–62 and 64–65.
-* Simulation duration can be set by changing the argument in the run() call on line 67.
+Results will be printed after each day, e.g.:
 
-Once these parameters are set, the simulator can be executed by clicking Run in any code editor of choice. The output will consist of a line-by-line description of the compartments at each time step (1 step = 1 day). 
-
-For example: Day 10: {'S': 12, 'I': 33, 'R': 5}
+Day 10: {'S': 12, 'E': 4, 'I': 29, 'R': 5}
 
 # Architecture Overview
 
@@ -77,6 +71,6 @@ The Intervention class defines the execute function, which applies user-selected
 
 The Population class manages a collection of Person objects and generates a contact graph that models interactions. This graph ensures realistic infection dynamics. It includes two key functions: one to generate the graph and another to retrieve the contacts of a given person (node).
 
-The Simulation class coordinates the epidemic process. It contains methods to advance the simulation step by step, run the simulation over a set period, and track statistics (such as susceptible, infected, and recovered counts). These functions are integrated within the main program, which drives the simulation and records results.
+The Simulation class coordinates the epidemic process. It contains methods to advance the simulation step by step, run the simulation over a set period, and track statistics (such as susceptible, exposed, infected, and recovered counts). These functions are integrated within the main program, which drives the simulation and records results.
 
 Overall, the architecture of the project closely follows the original UML class and sequence diagrams. The only major modification is the addition of the EnumeratedTypes class, which was separated out to improve modularity. This adjustment also shifted some of the relationships between classes compared to the original UML design.
