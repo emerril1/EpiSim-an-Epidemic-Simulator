@@ -2,16 +2,18 @@ from EnumeratedTypes import State, InterventionType
 import random
 from Population import Population
 
-''' Different types of interventions to control the spread of the virus.
-Can either vaccinate a portion of the population or quarantine infected individuals.'''
-
 class Intervention:
-    ''' Initialize with the type of intervention.'''
-    def __init__(self, intervention_type: InterventionType):
-        self.type = intervention_type
+    ''' Different types of interventions to control the spread of the virus.
+        Can either vaccinate a portion of the population or quarantine infected individuals.'''
     
-    ''' Execute the intervention type on the given population.'''
+    def __init__(self, intervention_type: InterventionType):
+        ''' Initialize with the type of intervention.'''
+        
+        self.type = intervention_type
+
     def execute(self, population: Population):
+        ''' Execute the intervention type on the given population.'''
+        
         if self.type == InterventionType.VACCINE:
             for person in random.sample(population.population, len(population.population) // 30):
                 if person.state == State.SUSCEPTIBLE:
