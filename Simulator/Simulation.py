@@ -10,52 +10,73 @@ class Simulation:
     ''' Main simulation class that runs the epidemic simulation.
         Tracks the state of the population over time and applies virus dynamics.'''
 
-    def __init__(self, population: Population, virus: Virus):
-        ''' Initialize with a population and a virus.'''
-        
+    def __init__(self, population, virus, config):
         self.population = population
         self.virus = virus
-        self.time = 1
+        self.config = config
+        self.time = 0
         self.history = {}
-        
-    def step(self):
-        ''' Perform a single time step in the simulation. Performs specific operations based on state of individual (e.g. cure, infect)'''
-        
-        new_exposures = []
-        new_infections = []
-        new_recoveries = []
 
+        # Initialize interventions handler
+        self.interventions = Intervention(population, config)
+        self.interventions.vaccinate()
+
+    # -----------------------------
+    # Simulation Step
+    # -----------------------------
+    def step(self):
+        ''' Perform a single time step in the simulation.
+            Process infections, recoveries, and apply interventions.'''
+
+        ## Determine contact factor based on interventions. Can combine effects.
+        sd_factor = self.interventions.social_distancing(self.time)
+        q_factor = self.interventions.quarantine(self.time)
+        contact_factor = sd_factor * q_factor
+
+        ## Process infections and recoveries
+        new_infections = []
         for person in self.population.population:
             if person.state == State.INFECTED:
-                for contact in self.population.get_contacts(person):
-                    if contact.state == State.SUSCEPTIBLE and random.random() < self.virus.infect_rate:
-                        new_exposures.append(contact)
+                contacts = self.population.get_contacts(person)
+                num_contacts = int(len(contacts) * contact_factor)
+                reduced_contacts = random.sample(contacts, num_contacts) if num_contacts > 0 else []
+
+                for contact in reduced_contacts:
+                    if contact.state == State.SUSCEPTIBLE:
+                        infect_chance = self.virus.infect_rate
+
+                        # Reduce infection chance for vaccinated individuals
+                        if getattr(contact, "vaccinated", False):
+                            infect_chance *= (1 - contact.vaccine_effectiveness)
+
+                        if random.random() < infect_chance:
+                            new_infections.append(contact)
+
+                # Cure infected individuals
                 if random.random() < self.virus.cure_rate:
-                    new_recoveries.append(person)
+                    person.cure()
 
-            elif person.state == State.EXPOSED:
-                if self.time - person.exposed_time >= self.virus.infection_time:
-                    new_infections.append(person)
+        # Infect new contacts
+        for contact in new_infections:
+            contact.infect(self.time)
 
-        for p in new_exposures:
-            p.expose(self.time)
-        for p in new_infections:
-            p.infect(self.time)
-        for p in new_recoveries:
-            p.cure()
-
+        # Track statistics
         self.track_stats()
         self.time += 1
 
     def run(self, num_of_steps: int):
         ''' Run the simulation for a specified number of steps.'''
-        
-        for _ in range (num_of_steps):
+
+        print(f"[Run] Simulation running for {num_of_steps} days...")
+        for _ in range(num_of_steps):
             self.step()
+        print("[Run] Simulation complete.")
+
 
     def track_stats(self):
         ''' Track the number of susceptible, infected, and recovered individuals.'''
         
+        ## Count individuals in each state and store in history
         counts = {
             "S": sum(1 for p in self.population.population if p.state == State.SUSCEPTIBLE),
             "E": sum(1 for p in self.population.population if p.state == State.EXPOSED),
@@ -67,21 +88,28 @@ class Simulation:
 if __name__ == "__main__":
     ''' Example of running a simulation with configuration from a JSON file.'''
 
-    with open("Simulator/config.json", "r") as f:
+    ## Load configuration from JSON file
+    with open("Simidemic/Simulator/config.json", "r") as f:
         config = json.load(f)
 
-    pop_size = config["population"]["size"]
+    pop_info = config["population"]
     virus_info = config["virus"]
     sim_info = config["simulation"]
+    int_info = config["intervention"]
 
-    pop = Population(size = pop_size)
+    ## Initialize population, virus, and simulation
+    pop = Population(
+        size = pop_info["size"],
+        avg_degree = pop_info["avg_degree"],
+        rewire_prob = pop_info["rewire_prob"]
+    )
     virus = Virus(
         name = virus_info["name"],
         infect_rate = virus_info["infect_rate"],
         cure_rate = virus_info["cure_rate"],
         infection_time = virus_info["infection_time"]
     )
-    sim = Simulation(pop, virus)
+    sim = Simulation(pop, virus, config = config)
 
     # Initialize patient zero
     for _ in range(sim_info["initial_infected"]):

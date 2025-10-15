@@ -4,14 +4,12 @@ class Person:
     ''' Class representing a person in the simulation. Can either be susceptible, infected, or recovered.
         Functions to infect or cure the person. '''
     
-    _id = 0
     state = []
 
-    def __init__(self):
+    def __init__(self, id):
         ''' Initialize a person with a unique ID and susceptible state.'''
         
-        Person._id += 1
-        self.id = Person._id
+        self.id = id
         self.state = State.SUSCEPTIBLE
     
     def infect(self, time):

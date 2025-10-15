@@ -69,7 +69,7 @@ The Person class represents an individual in the population. Each person has a u
 
 The Intervention class defines the execute function, which applies user-selected interventions by modifying the population’s contact graph to simulate different scenarios (e.g. social distancing).
 
-The Population class manages a collection of Person objects and generates a contact graph that models interactions. This graph ensures realistic infection dynamics. It includes two key functions: one to generate the graph and another to retrieve the contacts of a given person (node).
+The Population class manages a collection of Person objects and generates a contact graph that models interactions. This graph ensures realistic infection dynamics by implementing a small world network that represents real-world contact patterns and infection spread. It includes two key functions: one to generate the graph and another to retrieve the contacts of a given person (node).
 
 The Simulation class coordinates the epidemic process. It contains methods to advance the simulation step by step, run the simulation over a set period, and track statistics (such as susceptible, exposed, infected, and recovered counts). These functions are integrated within the main program, which drives the simulation and records results.
 

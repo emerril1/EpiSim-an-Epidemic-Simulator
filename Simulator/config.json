@@ -1,10 +1,36 @@
 {
-  "simulation": { "steps": 50, "initial_infected": 1 },
-  "population": { "size": 50 },
+  "simulation": { 
+    "steps": 50, 
+    "initial_infected": 1 
+    },
+  "population": { 
+    "size": 50, 
+    "avg_degree": 6, 
+    "rewire_prob": 0.1 
+    },
   "virus": {
     "name": "T-Virus",
     "infect_rate": 0.6,
     "cure_rate": 0.025,
     "infection_time": 2
+    },
+  "intervention": {
+    "social_distancing": {
+      "enabled": false,
+      "reduction_factor": 0.4,
+      "start_day": 5,
+      "duration": 30
+      },
+    "vaccination": {
+      "enabled": true,
+      "coverage": 0.3,
+      "effectiveness": 0.9
+    },
+    "quarantine": {
+      "enabled": false,
+      "threshold": 0.1,
+      "effectiveness": 0.7,
+      "duration": 14
+      }
     }
   }
