@@ -1,7 +1,7 @@
 from EnumeratedTypes import State
 import random
 
-class Interventions:
+class Intervention:
     ''' Class to manage various interventions in the simulation. '''
 
     def __init__(self, population, config):
