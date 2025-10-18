@@ -2,76 +2,69 @@ from EnumeratedTypes import State
 import random
 
 class Intervention:
-    ''' Class to manage various interventions in the simulation. '''
+    """Class to manage interventions: vaccination, quarantine, and social distancing."""
 
     def __init__(self, population, config):
         self.population = population
         self.config = config
-        self.active_quarantine = False
-        self.quarantine_timer = 0
 
-    def vaccinate(self):
-        ''' Function to vaccinate a portion of the population at the start of the simulation.'''
+        # Flags to ensure interventions are applied only once if appropriate
+        self.vaccine_applied = False
+        self.quarantine_active = False
+        self.social_distancing_active = False
 
-        # Setup vaccination parameters
-        vaccine_cfg = self.config["intervention"].get("vaccine", {})
-        if not vaccine_cfg.get("enabled", False):
+    def apply_vaccine(self, current_day):
+        cfg = self.config.get("intervention", {}).get("vaccination", {})
+        if not cfg.get("enabled", False):
             return
 
-        # Vaccinate a portion of the population
-        coverage = vaccine_cfg.get("coverage", 0)
-        effectiveness = vaccine_cfg.get("effectiveness", 1.0)
-        num_vaccinated = int(len(self.population.population) * coverage)
+        start_day = cfg.get("start_day")
+        if current_day < start_day or self.vaccine_applied:
+            return
 
-        # Randomly select individuals to vaccinate
-        vaccinated_people = random.sample(self.population.population, num_vaccinated)
-        for person in vaccinated_people:
-            person.vaccinated = True
-            person.vaccine_effectiveness = effectiveness
+        coverage = cfg.get("coverage")
+        num_to_vaccinate = int(coverage * len(self.population.population))
+        candidates = random.sample(self.population.population, num_to_vaccinate)
 
-        # Log vaccination event
-        print(f"[Vaccine] {num_vaccinated} people vaccinated ({effectiveness*100:.0f}% effective).")
+        for p in candidates:
+            p.vaccinated = True
 
-    def quarantine(self, time):
-        ''' Function to manage quarantine measures based on infection levels.'''
+        self.vaccine_applied = True
+        print(f"[Day {current_day}] Vaccine applied to {num_to_vaccinate} individuals ")
 
-        # Setup quarantine parameters
-        quarantine_cfg = self.config["intervention"].get("quarantine", {})
-        if not quarantine_cfg.get("enabled", False):
-            return 1.0
+    def apply_quarantine(self, current_day):
+        cfg = self.config.get("intervention", {}).get("quarantine", {})
+        if not cfg.get("enabled", False):
+            return
 
-        # Calculate current infected fraction
-        infected_fraction = sum(1 for p in self.population.population if p.state == State.INFECTED) / len(self.population.population)
+        start_day = cfg.get("start_day")
+        if current_day < start_day or self.quarantine_active:
+            return
 
-        # Trigger quarantine
-        if (not self.active_quarantine and infected_fraction >= quarantine_cfg.get("threshold", 1.1)):
-            self.active_quarantine = True
-            self.quarantine_timer = quarantine_cfg.get("duration", 0)
-            print(f"[Quarantine] Triggered on day {time} (infected={infected_fraction:.2f}).")
+        coverage = cfg.get("coverage", 0)
+        infected = [p for p in self.population.population if p.state == State.INFECTED]
+        num_to_quarantine = int(coverage * len(infected))
+        if num_to_quarantine > 0:
+            isolated = random.sample(infected, num_to_quarantine)
+            for p in isolated:
+                p.isolated = True
+                
+        self.quarantine_active = True
+        print(f"[Day {current_day}] Quarantine started — isolated {num_to_quarantine} infected individuals.")
 
-        # Maintain or end quarantine
-        if self.active_quarantine:
-            effectiveness = quarantine_cfg.get("effectiveness", 0.0)
-            self.quarantine_timer -= 1
-            if self.quarantine_timer <= 0:
-                self.active_quarantine = False
-                print(f"[Quarantine] Lifted on day {time}.")
-            return 1 - effectiveness
-        return 1.0
+       
 
-    def social_distancing(self, time):
-        ''' Function to adjust contact factor based on social distancing measures.'''
+    def apply_social_distancing(self, current_day):
+        cfg = self.config.get("intervention", {}).get("social_distancing", {})
+        if not cfg.get("enabled", False):
+            return
 
-        # Setup social distancing parameters
-        sd_cfg = self.config["intervention"].get("social_distancing", {})
-        if not sd_cfg.get("enabled", False):
-            return 1.0
+        start_day = cfg.get("start_day")
+        if current_day < start_day or self.social_distancing_active:
+            return
 
-        # Determine if within social distancing period
-        start_day = sd_cfg.get("start_day", 0)
-        duration = sd_cfg.get("duration", 0)
-        reduction = sd_cfg.get("contact_reduction", 0.0)
+        reduction = cfg.get("reduction_factor")
+        self.population.adjust_contact_rate(reduction)
 
-        if start_day <= time < start_day + duration:
-            return 1 - reduction
-        return 1.0
+        self.social_distancing_active = True
+        print(f"[Day {current_day}] Social distancing applied - contact rate reduced by {reduction*100:.0f}%")

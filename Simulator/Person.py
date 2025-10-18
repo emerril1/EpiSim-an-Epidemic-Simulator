@@ -1,37 +1,35 @@
 from EnumeratedTypes import State
 
 class Person:
-    ''' Class representing a person in the simulation. Can either be susceptible, infected, or recovered.
-        Functions to infect or cure the person. '''
-    
-    state = []
+    """Represents one individual in the population and their health state."""
 
     def __init__(self, id):
-        ''' Initialize a person with a unique ID and susceptible state.'''
-        
+        """Initialize a person with a unique ID and default to susceptible."""
+
         self.id = id
         self.state = State.SUSCEPTIBLE
         self.exposed_time = None
         self.infected_time = None
         self.vaccinated = False
         self.vaccine_effectiveness = 0.0
-    
-    def infect(self, time):
-        ''' Function to infect the person, changing their state to infected.'''
-        
+        self.isolated = False
+
+    def expose(self, time):
+        """Expose a susceptible person to the virus (S → E)."""
+
         if self.state == State.SUSCEPTIBLE:
             self.state = State.EXPOSED
             self.exposed_time = time
-    
-    def cure(self, time):
-        ''' Function to cure the person, changing their state to recovered.'''
-        
-        if self.state != State.INFECTED:
+
+    def infect(self, time):
+        """Infect an exposed person after incubation (E → I)."""
+
+        if self.state == State.EXPOSED:
             self.state = State.INFECTED
             self.infected_time = time
 
-    def expose(self, time):
-        ''' Function to expose the person, changing their state to exposed.'''
+    def recover(self):
+        """Recover an infected person (I → R)."""
 
         if self.state == State.INFECTED:
             self.state = State.RECOVERED
