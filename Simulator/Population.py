@@ -4,29 +4,38 @@ from Person import Person
 from EnumeratedTypes import State
 
 class Population:
-    """Manages the population and infection spread through contacts."""
+    """ Manages the population and infection spread through contacts."""
 
     def __init__(self, size, avg_degree, rewire_prob):
         self.size = size
         self.population = [Person(i) for i in range(size)]
+
+        # Create a small-world contact network
         self.graph = nx.watts_strogatz_graph(size, avg_degree, rewire_prob)
         for i, person in enumerate(self.population):
             person.id = i
-        self.contact_reduction = 0.0  # for social distancing
+
+        # Contact reduction factor for social distancing
+        self.contact_reduction = 0.0
 
     def get_contacts(self, person):
+        """ Get contacts of a person based on the contact network."""
+
         return [self.population[n] for n in self.graph.neighbors(person.id)]
 
     def adjust_contact_rate(self, reduction):
-        """Reduce contact probability for social distancing."""
+        """ Reduce contact probability for social distancing."""
+
         self.contact_reduction = reduction
 
     def update(self, virus, current_day):
-        """Simulate one day of infections and recoveries."""
+        """ Simulate one day of infections and recoveries."""
+
         new_exposures = []
         new_infections = []
         new_recoveries = []
 
+        # Process each person in the population
         for person in self.population:
             if person.state == State.INFECTED and not getattr(person, "isolated", False):
                 for contact in self.get_contacts(person):
@@ -37,13 +46,16 @@ class Population:
                         if random.random() < infection_prob:
                             new_exposures.append(contact)
 
+                # Check for recovery
                 if random.random() < virus.cure_rate:
                     new_recoveries.append(person)
-
+            
+            # Check for infection progression
             elif person.state == State.EXPOSED:
                 if (current_day - person.exposed_time) >= virus.infection_time:
                     new_infections.append(person)
 
+        # Update states after processing to avoid mid-iteration changes
         for p in new_exposures:
             p.expose(current_day)
         for p in new_infections:
