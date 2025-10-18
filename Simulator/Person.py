@@ -11,20 +11,27 @@ class Person:
         
         self.id = id
         self.state = State.SUSCEPTIBLE
+        self.exposed_time = None
+        self.infected_time = None
+        self.vaccinated = False
+        self.vaccine_effectiveness = 0.0
     
     def infect(self, time):
         ''' Function to infect the person, changing their state to infected.'''
         
-        self.state = State.INFECTED
-        self.infected_time = time
+        if self.state == State.SUSCEPTIBLE:
+            self.state = State.EXPOSED
+            self.exposed_time = time
     
-    def cure(self):
+    def cure(self, time):
         ''' Function to cure the person, changing their state to recovered.'''
         
-        self.state = State.RECOVERED
+        if self.state != State.INFECTED:
+            self.state = State.INFECTED
+            self.infected_time = time
 
     def expose(self, time):
         ''' Function to expose the person, changing their state to exposed.'''
 
-        self.state = State.EXPOSED
-        self.exposed_time = time
+        if self.state == State.INFECTED:
+            self.state = State.RECOVERED

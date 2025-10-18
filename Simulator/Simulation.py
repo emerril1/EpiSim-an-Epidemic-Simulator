@@ -4,11 +4,13 @@ from Intervention import Intervention
 from EnumeratedTypes import State
 import random
 import json
+import matplotlib.pyplot as plt
 
 class Simulation:
     ''' Main simulation class that runs the epidemic simulation.
         Tracks the state of the population over time and applies virus dynamics.'''
 
+    # Initialize simulation with population, virus, and configuration
     def __init__(self, population, virus, config):
         self.population = population
         self.virus = virus
@@ -30,34 +32,43 @@ class Simulation:
         contact_factor = sd_factor * q_factor
 
         # Process infections and recoveries
+        new_exposures = []
         new_infections = []
+
+        # Iterate over all individuals in the population
         for person in self.population.population:
+
+            # Infectious people spread infection
             if person.state == State.INFECTED:
 
-                # Get contacts and apply contact reduction
+                # Get contacts adjusted by contact factor
                 contacts = self.population.get_contacts(person)
                 num_contacts = int(len(contacts) * contact_factor)
                 reduced_contacts = random.sample(contacts, num_contacts) if num_contacts > 0 else []
 
+                # Attempt to infect contacts
                 for contact in reduced_contacts:
                     if contact.state == State.SUSCEPTIBLE:
                         infect_chance = self.virus.infect_rate
-
-                        # Reduce infection chance for vaccinated individuals
                         if getattr(contact, "vaccinated", False):
                             infect_chance *= (1 - contact.vaccine_effectiveness)
-
-                        # Attempt infection
                         if random.random() < infect_chance:
-                            new_infections.append(contact)
+                            new_exposures.append(contact)
 
                 # Cure infected individuals
                 if random.random() < self.virus.cure_rate:
                     person.cure()
 
-        # Infect new contacts
-        for contact in new_infections:
-            contact.infect(self.time)
+        # Process exposed individuals becoming infected
+        for person in self.population.population:
+            if person.state == State.EXPOSED and self.time - person.exposed_time >= self.virus.infection_time:
+                new_infections.append(person)
+
+        # Apply new state transitions
+        for p in new_exposures:
+            p.expose(self.time)
+        for p in new_infections:
+            p.infect(self.time)
 
         # Track statistics
         self.track_stats()
@@ -81,6 +92,35 @@ class Simulation:
             "R": sum(1 for p in self.population.population if p.state == State.RECOVERED)
         }
         self.history[self.time] = counts
+
+    def plot_curve(self):
+        ''' Plot the infection curve over time.'''
+
+        # Prepare data for plotting
+        days = list(sim.history.keys())
+
+        # Extract state counts
+        susceptible = [h.get("S", 0) for h in sim.history.values()]
+        exposed     = [h.get("E", 0) for h in sim.history.values()] if "E" in next(iter(sim.history.values()), {}) else None
+        infected    = [h.get("I", 0) for h in sim.history.values()]
+        recovered   = [h.get("R", 0) for h in sim.history.values()]
+
+        # Plotting
+        plt.figure(figsize=(10,6))
+        plt.plot(days, susceptible, label="Susceptible", linewidth=2)
+        if exposed:
+            plt.plot(days, exposed, label="Exposed", linewidth=2)
+        plt.plot(days, infected, label="Infected", linewidth=2)
+        plt.plot(days, recovered, label="Recovered", linewidth=2)
+
+        # Plot formatting
+        plt.title("Epidemic Simulation Over Time", fontsize=14)
+        plt.xlabel("Day")
+        plt.ylabel("Number of Individuals")
+        plt.legend()
+        plt.grid(True, linestyle="--", alpha=0.6)
+        plt.tight_layout()
+        plt.show()
 
 if __name__ == "__main__":
     ''' Example of running a simulation with configuration from a JSON file.'''
@@ -106,7 +146,7 @@ if __name__ == "__main__":
         cure_rate = virus_info["cure_rate"],
         infection_time = virus_info["infection_time"]
     )
-    sim = Simulation(pop, virus, config = config)
+    sim = Simulation(pop, virus, config)
 
     # Initialize patient zero
     for _ in range(sim_info["initial_infected"]):
@@ -120,3 +160,8 @@ if __name__ == "__main__":
     for t, stats in sim.history.items():
         print(f"Day {t}: {stats}")
     print("Simulation complete.")
+
+    # Plot infection curve
+    sim.plot_curve()
+
+
