@@ -1,84 +1,120 @@
 from Population import Population
 from Virus import Virus
-from Intervention import Intervention 
 from EnumeratedTypes import State
+from Intervention import Intervention
+from collections import Counter
 import json
 import matplotlib.pyplot as plt
 
 class Simulation:
-    """ Runs the epidemic simulation and tracks population state over time."""
+    """Runs the epidemic simulation and tracks population state over time."""
 
-    def __init__(self, population: Population, virus: Virus, config: dict):
-        self.population = population
-        self.virus = virus
-        self.config = config
-        self.intervention = Intervention(population, config)
-        self.time = 1
-        self.history = {}
+    def __init__(self, config):
+        self.duration = config["simulation"]["duration"]
+        vir_cofg = config["virus"]
+        pop_cfg = config["population"]
 
-    def step(self):
-        """ Simulate one day in the epidemic."""
+        # Initialize virus
+        self.virus = Virus( 
+           name = vir_cofg["name"], 
+           infect_rate = vir_cofg["infect_rate"], 
+           cure_rate = vir_cofg["cure_rate"], 
+           infection_time = vir_cofg["infection_time"] 
+        )
 
-        # Apply interventions
-        self.intervention.apply_social_distancing(self.time)
-        self.intervention.apply_quarantine(self.time)
-        self.intervention.apply_vaccine(self.time)
+        # Initialize population
+        self.population = Population(
+            size = pop_cfg["size"],
+            avg_degree = pop_cfg["avg_degree"],
+            rewire_prob = pop_cfg["rewire_prob"],
+            risk_factors = pop_cfg.get("risk_factors", None)
+        )
 
-        # Update population state
-        self.population.update(self.virus, self.time)
-        self.track_stats()
-        self.time += 1
+        # Initialize interventions
+        self.intervention = Intervention(self.population, config)
+        self.history = []
 
-    def run(self, duration):
-        """ Run the simulation for the specified duration."""
+    def run(self):
+        """Run the simulation for the configured duration."""
 
-        # Start simulation loop 
-        print(f"Starting simulation for {duration} days...\n")
-        for _ in range(duration):
-            self.step()
-        print("\nSimulation complete.\n")
+        # Infect patient zero
+        initial_infected = self.population.population[0]
+        initial_infected.state = State.INFECTED
 
-    def track_stats(self): 
-        """ Track and store daily statistics of the population states."""
+        # Start simulation
+        print(f"\n=== Starting Simulation: {self.virus.name} ===\n")
+        for day in range(1, self.duration + 1):
 
-        # Count individuals in each state
-        counts = {
-            "S": sum(p.state == State.SUSCEPTIBLE for p in self.population.population),
-            "E": sum(p.state == State.EXPOSED for p in self.population.population),
-            "I": sum(p.state == State.INFECTED for p in self.population.population),
-            "R": sum(p.state == State.RECOVERED for p in self.population.population)
-        }
+            # Apply interventions (based on config)
+            self.intervention.apply_vaccine(day)
+            self.intervention.apply_social_distancing(day)
+            self.intervention.apply_quarantine(day)
 
-        # Store daily counts
-        self.history[self.time] = counts
-        print(f"Day {self.time}: {counts}")
+            # Update infection states
+            self.population.update(self.virus, day)
+
+            # Count SEIR states
+            counts = Counter([p.state for p in self.population.population])
+            ordered = {
+                "S": counts.get(State.SUSCEPTIBLE, 0),
+                "E": counts.get(State.EXPOSED, 0),
+                "I": counts.get(State.INFECTED, 0),
+                "R": counts.get(State.RECOVERED, 0)
+            }
+
+            # Count infected by age group
+            infected_by_age = Counter([
+                p.age_group for p in self.population.population
+                if p.state == State.INFECTED
+            ])
+
+            # Store and print
+            self.history.append(ordered)
+            print(f"{self.virus.name} — Day {day}: {ordered} | Infected by Age: {dict(infected_by_age)}")
+
+        # Final results
+        print(f"\n=== Simulation Complete: {self.virus.name} ===")
+        age_counts = Counter([p.age_group for p in self.population.population])
+        print(f"Age Group Distribution: {dict(age_counts)}")
+        print(f"Comparment Distribution: {self.history[-1]}")
+        
+        # Final age breakdown by infection state
+        final_age_groups = {g: Counter(p.state for p in self.population.population if p.age_group == g) for g in age_counts.keys()}
+        print("\nFinal State by Age Group:")
+        for group, states in final_age_groups.items():
+            print(f"  {group}: {{S: {states.get(State.SUSCEPTIBLE, 0)}, "
+                  f"E: {states.get(State.EXPOSED, 0)}, "
+                  f"I: {states.get(State.INFECTED, 0)}, "
+                  f"R: {states.get(State.RECOVERED, 0)}}}")
+            
+        # Plot the epidemic curve
+        self.plot_curve()
 
     def plot_curve(self):
-        """ Plot the epidemic progression over time."""
+        """Plot the epidemic progression over time."""
 
-        # Prepare data for plotting
-        days = list(self.history.keys())
-        susceptible = [h["S"] for h in self.history.values()]
-        exposed = [h["E"] for h in self.history.values()]
-        infected = [h["I"] for h in self.history.values()]
-        recovered = [h["R"] for h in self.history.values()]
+        # Prepare data
+        days = list(range(1, len(self.history) + 1))
+        S = [day["S"] for day in self.history]
+        E = [day["E"] for day in self.history]
+        I = [day["I"] for day in self.history]
+        R = [day["R"] for day in self.history]
 
-        # Plotting the curves
+        # Plotting
         plt.figure(figsize = (10, 6))
-        plt.plot(days, susceptible, label = "Susceptible", linewidth = 2)
-        plt.plot(days, exposed, label = "Exposed", linewidth = 2)
-        plt.plot(days, infected, label = "Infected", linewidth = 2)
-        plt.plot(days, recovered, label = "Recovered", linewidth = 2)
+        plt.plot(days, S, label = "Susceptible")
+        plt.plot(days, E, label = "Exposed")
+        plt.plot(days, I, label = "Infected")
+        plt.plot(days, R, label = "Recovered")
 
-        # Customize plot
-        plt.title("Epidemic Simulation Over Time", fontsize = 14)
+        # Finalize plot
+        plt.title(f"Epidemic Simulation: {self.virus.name}")
         plt.xlabel("Day")
-        plt.ylabel("Number of Individuals")
+        plt.ylabel("Number of People")
         plt.legend()
-        plt.grid(True, linestyle = "--", alpha=0.6)
+        plt.grid(True)
         plt.tight_layout()
         plt.show()
-
 
 if __name__ == "__main__":
 
@@ -86,29 +122,6 @@ if __name__ == "__main__":
     with open("Simidemic/Simulator/config.json") as f:
         config = json.load(f)
 
-    # Initialize components
-    pop = Population(
-        size = config["population"]["size"],
-        avg_degree = config["population"]["avg_degree"],
-        rewire_prob = config["population"]["rewire_prob"]
-    )
-    virus = Virus(
-        name = config["virus"]["name"],
-        infect_rate = config["virus"]["infect_rate"],
-        cure_rate = config["virus"]["cure_rate"],
-        infection_time = config["virus"]["infection_time"]
-    )
-
-    # Create simulation
-    sim = Simulation(pop, virus, config)
-
-    # Infect patient zero
-    patient_zero = pop.population[0]
-    patient_zero.state = State.INFECTED
-    patient_zero.infected_time = 0
-
-    # Run simulation
-    sim.run(config["simulation"]["duration"])
-
-    # Plot results
-    sim.plot_curve()
+    # Create and run simulation
+    sim = Simulation(config)
+    sim.run()

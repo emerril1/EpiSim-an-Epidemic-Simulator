@@ -39,7 +39,7 @@ The NetworkX library is required to generate and manage the population contact g
 1.Standard Installation (recommended)
 
 From a terminal or command prompt, run:
-- pip install networkx
+- `pip install networkx`
 
 Official installation instructions are available here: https://networkx.org/documentation/stable/install.html
 

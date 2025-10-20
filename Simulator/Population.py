@@ -4,58 +4,55 @@ from Person import Person
 from EnumeratedTypes import State
 
 class Population:
-    """ Manages the population and infection spread through contacts."""
+    """Manages individuals and their contact network."""
 
-    def __init__(self, size, avg_degree, rewire_prob):
+    def __init__(self, size, avg_degree, rewire_prob, risk_factors = None):
         self.size = size
+        self.avg_degree = avg_degree
+        self.rewire_prob = rewire_prob
         self.population = [Person(i) for i in range(size)]
-
-        # Create a small-world contact network
         self.graph = nx.watts_strogatz_graph(size, avg_degree, rewire_prob)
-        for i, person in enumerate(self.population):
-            person.id = i
-
-        # Contact reduction factor for social distancing
-        self.contact_reduction = 0.0
+        self.risk_factors = risk_factors
 
     def get_contacts(self, person):
         """ Get contacts of a person based on the contact network."""
 
-        return [self.population[n] for n in self.graph.neighbors(person.id)]
-
-    def adjust_contact_rate(self, reduction):
-        """ Reduce contact probability for social distancing."""
-
-        self.contact_reduction = reduction
+        neighbors = list(self.graph.neighbors(person.id))
+        return [self.population[n] for n in neighbors]
 
     def update(self, virus, current_day):
-        """ Simulate one day of infections and recoveries."""
+        """ Update the state of the population for one time step."""
 
-        new_exposures = []
-        new_infections = []
-        new_recoveries = []
+        new_exposures, new_infections, new_recoveries = [], [], []
 
         # Process each person in the population
         for person in self.population:
-            if person.state == State.INFECTED and not getattr(person, "isolated", False):
+            if person.state == State.INFECTED:
                 for contact in self.get_contacts(person):
                     if contact.state == State.SUSCEPTIBLE:
-                        infection_prob = virus.infect_rate * (1 - self.contact_reduction)
+                        infection_prob = virus.infect_rate
+
+                        # Apply risk group modifier from config
+                        group = contact.age_group
+                        if group in self.risk_factors:
+                            infection_prob *= self.risk_factors[group]
+
+                        # Apply vaccine protection if vaccinated
                         if contact.vaccinated:
                             infection_prob *= (1 - contact.vaccine_effectiveness)
+
                         if random.random() < infection_prob:
                             new_exposures.append(contact)
 
-                # Check for recovery
+                # Recovery chance
                 if random.random() < virus.cure_rate:
                     new_recoveries.append(person)
-            
-            # Check for infection progression
+
             elif person.state == State.EXPOSED:
                 if (current_day - person.exposed_time) >= virus.infection_time:
                     new_infections.append(person)
 
-        # Update states after processing to avoid mid-iteration changes
+        # Apply state changes
         for p in new_exposures:
             p.expose(current_day)
         for p in new_infections:

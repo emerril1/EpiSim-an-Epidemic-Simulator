@@ -1,4 +1,5 @@
 from EnumeratedTypes import State
+import random
 
 class Person:
     """ Represents one individual in the population and their health state."""
@@ -13,7 +14,19 @@ class Person:
         self.vaccinated = False
         self.vaccine_effectiveness = 0.0
         self.isolated = False
+        self.age = random.randint(0, 100)
+        self.age_group = self.assign_age_group()
 
+    def assign_age_group(self):
+        """ Assign a person to an age group based on age."""
+
+        if self.age < 18:
+            return "child"
+        elif self.age < 65:
+            return "adult"
+        else:
+            return "senior"
+        
     def expose(self, time):
         """ Expose a susceptible person to the virus (S → E)."""
 

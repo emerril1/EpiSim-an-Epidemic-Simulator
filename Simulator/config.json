@@ -6,7 +6,12 @@
   "population": { 
     "size": 50, 
     "avg_degree": 6, 
-    "rewire_prob": 0.1 
+    "rewire_prob": 0.1,
+    "risk_factors": {
+      "child": 0.5,
+      "adult": 1.0,
+      "senior": 1.6
+      }
     },
   "virus": {
     "name": "T-Virus",
@@ -26,7 +31,7 @@
       "start_day": 1
     },
     "quarantine": {
-      "enabled": true,
+      "enabled": false,
       "coverage": 1,
       "start_day": 1
       }

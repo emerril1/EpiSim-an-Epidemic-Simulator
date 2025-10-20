@@ -25,6 +25,7 @@ class Intervention:
         if current_day < start_day or self.vaccine_applied:
             return
         
+        # Determine number to vaccinate
         coverage = cfg.get("coverage")
         num_to_vaccinate = int(coverage * len(self.population.population))
         candidates = random.sample(self.population.population, num_to_vaccinate)
@@ -49,10 +50,12 @@ class Intervention:
         if current_day < start_day or self.quarantine_active:
             return
 
+        # Apply quarantine to a portion of infected individuals
         coverage = cfg.get("coverage", 0)
         infected = [p for p in self.population.population if p.state == State.INFECTED]
         num_to_quarantine = int(coverage * len(infected))
 
+        # Quarantine selected individuals
         if num_to_quarantine > 0:
             isolated = random.sample(infected, num_to_quarantine)
             for p in isolated:
