@@ -7,6 +7,8 @@ class Population:
     """Manages individuals and their contact network."""
 
     def __init__(self, size, avg_degree, rewire_prob, risk_factors = None):
+        """ Initialize population configuration parameters."""
+
         self.size = size
         self.avg_degree = avg_degree
         self.rewire_prob = rewire_prob

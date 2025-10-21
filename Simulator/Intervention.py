@@ -5,6 +5,8 @@ class Intervention:
     """ Class to manage interventions: vaccination, quarantine, and social distancing."""
 
     def __init__(self, population, config):
+        """ Initialize population and intervention configurations."""
+        
         self.population = population
         self.config = config
 
