@@ -1,7 +1,9 @@
 {
   "simulation": { 
     "duration": 50, 
-    "initial_infected": 1 
+    "initial_infected": 1,
+    "purpose": "Baseline",
+    "params_changed": "Default"
     },
   "population": { 
     "size": 50, 

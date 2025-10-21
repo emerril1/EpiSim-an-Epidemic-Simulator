@@ -4,13 +4,30 @@ from EnumeratedTypes import State
 from Intervention import Intervention
 from collections import Counter
 import json
+import csv
+import os
+import time
 import matplotlib.pyplot as plt
 
 class Simulation:
     """Runs the epidemic simulation and tracks population state over time."""
 
+    RESULTS_DIR = "Simidemic/Simulator/results"
+    RUN_LOG_FILE = os.path.join(RESULTS_DIR, "simulation_log.csv")
+
     def __init__(self, config):
+        """ Initialize simulation with configuration parameters."""
+
+        # Set up simulation parameters
+        self.run_id = self.get_next_run_id()
+        self.purpose = config["simulation"]["purpose"]
+        self.params_changed = config["simulation"]["params_changed"]
         self.duration = config["simulation"]["duration"]
+
+        # Ensure results directory exists
+        os.makedirs(self.RESULTS_DIR, exist_ok = True)
+
+        # Initialize virus and population configurations
         vir_cofg = config["virus"]
         pop_cfg = config["population"]
 
@@ -33,9 +50,27 @@ class Simulation:
         # Initialize interventions
         self.intervention = Intervention(self.population, config)
         self.history = []
+    
+    def get_next_run_id(cls):
+        """Read the last run ID from the log and increment it."""
+
+        if not os.path.exists(cls.RUN_LOG_FILE):
+            return "001"
+        try:
+            with open(cls.RUN_LOG_FILE, "r") as file:
+                lines = file.readlines()
+                if len(lines) <= 1:
+                    return "001"
+                last_line = lines[-1].strip().split(",")[0]
+                next_id = int(last_line) + 1
+                return f"{next_id:03d}"
+        except Exception:
+            return "001"
 
     def run(self):
         """Run the simulation for the configured duration."""
+
+        start_time = time.time()
 
         # Infect patient zero
         initial_infected = self.population.population[0]
@@ -72,11 +107,14 @@ class Simulation:
             self.history.append(ordered)
             print(f"{self.virus.name} — Day {day}: {ordered} | Infected by Age: {dict(infected_by_age)}")
 
+        runtime = time.time() - start_time
+
         # Final results
         print(f"\n=== Simulation Complete: {self.virus.name} ===")
         age_counts = Counter([p.age_group for p in self.population.population])
         print(f"Age Group Distribution: {dict(age_counts)}")
         print(f"Comparment Distribution: {self.history[-1]}")
+        print(f"Total Runtime: {runtime:.2f} seconds\n")
         
         # Final age breakdown by infection state
         final_age_groups = {g: Counter(p.state for p in self.population.population if p.age_group == g) for g in age_counts.keys()}
@@ -87,8 +125,36 @@ class Simulation:
                   f"I: {states.get(State.INFECTED, 0)}, "
                   f"R: {states.get(State.RECOVERED, 0)}}}")
             
-        # Plot the epidemic curve
+        data_filename = self.export_run_data()
+        self.log_run(runtime, data_filename)
         self.plot_curve()
+
+    def export_run_data(self):
+        """Export SEIR daily data to CSV."""
+
+        data_filename = os.path.join(self.RESULTS_DIR, f"run_{self.run_id}.csv")
+
+        with open(data_filename, "w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["Day", "Susceptible", "Exposed", "Infected", "Recovered"])
+            for day, data in enumerate(self.history, start=1):
+                writer.writerow([day, data["S"], data["E"], data["I"], data["R"]])
+
+        print(f"Data exported to {data_filename}")
+        return data_filename
+
+    def log_run(self, runtime, data_filename):
+        """Log metadata for each run."""
+
+        log_exists = os.path.exists(self.RUN_LOG_FILE)
+        with open(self.RUN_LOG_FILE, "a", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            if not log_exists:
+                writer.writerow(["Run ID", "Purpose", "Parameters Changed", "Duration", "Data File"])
+            formatted_time = f"{int(runtime // 60)}m {int(runtime % 60)}s"
+            writer.writerow([self.run_id, self.purpose, self.params_changed, formatted_time, os.path.basename(data_filename)])
+
+        print(f"Run logged to {self.RUN_LOG_FILE}")
 
     def plot_curve(self):
         """Plot the epidemic progression over time."""
@@ -118,10 +184,11 @@ class Simulation:
 
 if __name__ == "__main__":
 
-    # Load configuration
+    # Load config
     with open("Simidemic/Simulator/config.json") as f:
         config = json.load(f)
-
-    # Create and run simulation
     sim = Simulation(config)
+
+    # Run the simulation
     sim.run()
+
