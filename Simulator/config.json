@@ -28,7 +28,7 @@
       "start_day": 5
       },
     "vaccination": {
-      "enabled": false,
+      "enabled": true,
       "coverage": 0.5,
       "start_day": 1
     },

@@ -4,10 +4,11 @@ from EnumeratedTypes import State
 from Person import Person
 
 class Population:
-    """Represents the population and manages infection spread."""
+    """ Represents the population and manages infection spread."""
 
-    def __init__(self, size, avg_degree, rewire_prob, risk_factors=None):
-        """Initialize the population network."""
+    def __init__(self, size, avg_degree, rewire_prob, risk_factors = None):
+        """ Initialize the population network."""
+
         self.size = size
         self.avg_degree = avg_degree
         self.rewire_prob = rewire_prob
@@ -21,16 +22,19 @@ class Population:
         self.contact_reduction = 1.0
 
     def adjust_contact_rate(self, reduction_factor):
-        """Reduce contact rate due to social distancing."""
+        """ Reduce contact rate due to social distancing."""
+
         self.contact_reduction = max(0.0, 1.0 - reduction_factor)
 
     def update(self, virus, day):
-        """Update infection states across the population."""
+        """ Update infection states across the population."""
+
         newly_exposed = []
         newly_infected = []
         newly_recovered = []
 
         for person in self.population:
+
             # Skip isolated or recovered individuals
             if person.isolated or person.state == State.RECOVERED:
                 continue

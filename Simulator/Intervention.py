@@ -38,7 +38,6 @@ class Intervention:
 
         # Mark vaccination as applied
         self.vaccine_applied = True
-        print(f"[Day {current_day}] Vaccine applied to {num_to_vaccinate} individuals ")
 
     def apply_quarantine(self, current_day):
         """ Isolate a portion of infected individuals."""
@@ -65,7 +64,6 @@ class Intervention:
 
         # Mark quarantine as applied
         self.quarantine_active = True
-        print(f"[Day {current_day}] Quarantine started — isolated {num_to_quarantine} infected individuals.")
        
     def apply_social_distancing(self, current_day):
         """ Reduce contact rates in the population."""
@@ -85,4 +83,3 @@ class Intervention:
 
         # Mark social distancing as applied
         self.social_distancing_active = True
-        print(f"[Day {current_day}] Social distancing applied - contact rate reduced by {reduction*100:.0f}%")
