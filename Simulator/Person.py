@@ -2,12 +2,16 @@ from EnumeratedTypes import State
 import random
 
 class Person:
-    """ Represents one individual in the population and their health state."""
+    """Represents one individual in the population and their health state."""
 
-    def __init__(self, id):
-        """ Initialize a person with a unique ID and default to susceptible."""
+    _global_id_counter = 0  # Shared across all Person instances
 
-        self.id = id
+    def __init__(self):
+        """Initialize a person with a unique global ID and default to susceptible."""
+
+        self.id = Person._global_id_counter
+        Person._global_id_counter += 1
+
         self.state = State.SUSCEPTIBLE
         self.exposed_time = None
         self.infected_time = None
@@ -17,32 +21,38 @@ class Person:
         self.age = random.randint(0, 100)
         self.age_group = self.assign_age_group()
 
-    def assign_age_group(self):
-        """ Assign a person to an age group based on age."""
+        # Tracking attributes for simulation events
+        self.days_exposed = 0
+        self.days_infected = 0
+        self.just_infected = False
+        self.just_recovered = False
 
+    def assign_age_group(self):
+        """Assign a person to an age group based on age."""
         if self.age < 18:
             return "child"
         elif self.age < 65:
             return "adult"
         else:
             return "senior"
-        
-    def expose(self, time):
-        """ Expose a susceptible person to the virus (S → E)."""
 
+    def expose(self, time):
+        """Expose a susceptible person to the virus (S → E)."""
         if self.state == State.SUSCEPTIBLE:
             self.state = State.EXPOSED
             self.exposed_time = time
+            self.days_exposed = 0
 
     def infect(self, time):
-        """ Infect an exposed person after incubation (E → I)."""
-
+        """Infect an exposed person after incubation (E → I)."""
         if self.state == State.EXPOSED:
             self.state = State.INFECTED
             self.infected_time = time
+            self.just_infected = True
+            self.days_infected = 0
 
     def recover(self):
-        """ Recover an infected person (I → R)."""
-
+        """Recover an infected person (I → R)."""
         if self.state == State.INFECTED:
             self.state = State.RECOVERED
+            self.just_recovered = True

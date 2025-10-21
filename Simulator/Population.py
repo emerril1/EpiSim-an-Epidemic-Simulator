@@ -1,63 +1,72 @@
 import networkx as nx
 import random
-from Person import Person
 from EnumeratedTypes import State
+from Person import Person
 
 class Population:
-    """Manages individuals and their contact network."""
+    """Represents the population and manages infection spread."""
 
-    def __init__(self, size, avg_degree, rewire_prob, risk_factors = None):
-        """ Initialize population configuration parameters."""
-
+    def __init__(self, size, avg_degree, rewire_prob, risk_factors=None):
+        """Initialize the population network."""
         self.size = size
         self.avg_degree = avg_degree
         self.rewire_prob = rewire_prob
-        self.population = [Person(i) for i in range(size)]
-        self.graph = nx.watts_strogatz_graph(size, avg_degree, rewire_prob)
         self.risk_factors = risk_factors
+        self.population = [Person() for _ in range(size)]
+        
+        # Create a small-world network for realistic contacts
+        self.network = nx.watts_strogatz_graph(size, avg_degree, rewire_prob)
 
-    def get_contacts(self, person):
-        """ Get contacts of a person based on the contact network."""
+        # Base contact rate (modifiable by social distancing)
+        self.contact_reduction = 1.0
 
-        neighbors = list(self.graph.neighbors(person.id))
-        return [self.population[n] for n in neighbors]
+    def adjust_contact_rate(self, reduction_factor):
+        """Reduce contact rate due to social distancing."""
+        self.contact_reduction = max(0.0, 1.0 - reduction_factor)
 
-    def update(self, virus, current_day):
-        """ Update the state of the population for one time step."""
+    def update(self, virus, day):
+        """Update infection states across the population."""
+        newly_exposed = []
+        newly_infected = []
+        newly_recovered = []
 
-        new_exposures, new_infections, new_recoveries = [], [], []
-
-        # Process each person in the population
         for person in self.population:
-            if person.state == State.INFECTED:
-                for contact in self.get_contacts(person):
-                    if contact.state == State.SUSCEPTIBLE:
-                        infection_prob = virus.infect_rate
+            # Skip isolated or recovered individuals
+            if person.isolated or person.state == State.RECOVERED:
+                continue
 
-                        # Apply risk group modifier from config
-                        group = contact.age_group
-                        if group in self.risk_factors:
-                            infection_prob *= self.risk_factors[group]
+            # Infection spread (S → E)
+            if person.state == State.SUSCEPTIBLE:
+                neighbors = [self.population[n] for n in self.network.neighbors(person.id)]
+                infected_neighbors = [n for n in neighbors if n.state == State.INFECTED]
+                
+                if infected_neighbors:
+                    infection_prob = virus.infect_rate * self.contact_reduction
+                    
+                    # Adjust based on age/risk group (if config defines it)
+                    if self.risk_factors:
+                        risk_factor = self.risk_factors.get(person.age_group, 1.0)
+                        infection_prob *= risk_factor
+                    
+                    if random.random() < infection_prob:
+                        newly_exposed.append(person)
 
-                        # Apply vaccine protection if vaccinated
-                        if contact.vaccinated:
-                            infection_prob *= (1 - contact.vaccine_effectiveness)
-
-                        if random.random() < infection_prob:
-                            new_exposures.append(contact)
-
-                # Recovery chance
-                if random.random() < virus.cure_rate:
-                    new_recoveries.append(person)
-
+            # Exposed → Infected (after incubation period)
             elif person.state == State.EXPOSED:
-                if (current_day - person.exposed_time) >= virus.infection_time:
-                    new_infections.append(person)
+                person.days_exposed += 1
+                if person.days_exposed >= virus.infection_time:
+                    newly_infected.append(person)
 
-        # Apply state changes
-        for p in new_exposures:
-            p.expose(current_day)
-        for p in new_infections:
-            p.infect(current_day)
-        for p in new_recoveries:
+            # Infected → Recovered (based on cure rate)
+            elif person.state == State.INFECTED:
+                person.days_infected += 1
+                if random.random() < virus.cure_rate:
+                    newly_recovered.append(person)
+
+        # Apply transitions after iteration
+        for p in newly_exposed:
+            p.expose(day)
+        for p in newly_infected:
+            p.infect(day)
+        for p in newly_recovered:
             p.recover()
