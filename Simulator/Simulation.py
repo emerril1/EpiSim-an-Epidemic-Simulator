@@ -8,122 +8,115 @@ from Virus import Virus
 from Intervention import Intervention
 from EnumeratedTypes import State
 
-class Simulation:
-    """ Run an epidemic simulation, record results, and export all data."""
 
-    RESULTS_DIR = "Simidemic/Simulator/results"
+class Simulation:
+    """ Runs the epidemic simulation, logs all data, and exports summary statistics."""
+
+    RESULTS_DIR = "Simidemic/Simulator/results/"
 
     def __init__(self, config):
-        """ Initialize simulation parameters and configuration data"""
+        """ Initialize the simulation and all subsystems."""
 
         self.config = config
         os.makedirs(self.RESULTS_DIR, exist_ok = True)
 
-        # Initialize simulation metadata
-        sim_cfg = config["simulation"]
+        # Extracts and validates config file parameters
+        sim_cfg = config.get("simulation", {})
+        virus_cfg = config.get("virus", {})
+        pop_cfg = config.get("population", {})
+
+        self.duration = sim_cfg.get("duration", 50)
+        self.purpose = sim_cfg.get("purpose", "Baseline")
+        self.params_changed = sim_cfg.get("params_changed", "All defaults")
+
+        # Creates a unique Run ID
         self.run_id = self.get_next_run_id()
-        self.duration = sim_cfg["duration"]
-        self.purpose = sim_cfg["purpose"]
-        self.params_changed = sim_cfg["params_changed"]
 
-        # Initializes Virus config parameters
-        vir_cfg = config["virus"]
+        # Initializes the Virus, Population, and Intervention parameters from the config
         self.virus = Virus(
-            name = vir_cfg["name"],
-            infect_rate = vir_cfg["infect_rate"],
-            cure_rate = vir_cfg["cure_rate"],
-            infection_time = vir_cfg["infection_time"]
+            name = virus_cfg.get("name", "UnknownVirus"),
+            infect_rate = virus_cfg.get("infect_rate", 0.5),
+            cure_rate = virus_cfg.get("cure_rate", 0.1),
+            infection_time = virus_cfg.get("infection_time", 3),
         )
-
-        # Initializes Population config parameters
-        pop_cfg = config["population"]
         self.population = Population(
-            size = pop_cfg["size"],
-            avg_degree = pop_cfg["avg_degree"],
-            rewire_prob = pop_cfg["rewire_prob"],
-            risk_factors = pop_cfg.get("risk_factors")
+            size = pop_cfg.get("size", 100),
+            avg_degree = pop_cfg.get("avg_degree", 6),
+            rewire_prob = pop_cfg.get("rewire_prob", 0.1),
+            risk_factors = pop_cfg.get("risk_factors", {}),
         )
-
-        # Initializes Intervention config parameters
         self.intervention = Intervention(self.population, config)
 
-        # Tracks statisitics for final exported logs
-        self.history = []      
-        self.event_log = []   
-        self.runtime_ms = 0.0  
+        # Runtime tracking utilities
+        self.history, self.event_log = [], []
+        self.runtime_ms = 0.0
 
     @classmethod
     def get_next_run_id(cls):
-        """ Get the next sequential run ID."""
+        """ Generate the next run ID based on previous log entries."""
 
-        os.makedirs(cls.RESULTS_DIR, exist_ok = True)
-        log_path = os.path.join(cls.RESULTS_DIR, "log.csv")
-
-        if not os.path.exists(log_path):
+        os.makedirs(cls.RESULTS_DIR, exist_ok=True)
+        log_file = os.path.join(cls.RESULTS_DIR, "log.csv")
+        if not os.path.exists(log_file):
             return "001"
 
-        with open(log_path, "r", newline = "") as file:
-            rows = list(csv.reader(file))
-            last_valid = next((r for r in reversed(rows) if r and r[0].isdigit()), None)
-            if not last_valid:
-                return "001"
-            return f"{int(last_valid[0]) + 1:03d}"
+        with open(log_file, "r", newline="") as f:
+            rows = list(csv.reader(f))
+            last = next((r for r in reversed(rows) if r and r[0].isdigit()), None)
+            return f"{int(last[0]) + 1:03d}" if last else "001"
 
     def run(self):
-        """ Main simulation loop."""
+        """ Execute the full simulation across the configured duration."""
 
-        start_time = time.time()
+        # Start simulation runtime tracking
+        start = time.time()
 
-        # Infect patient zero
+        # Infects patient zero
+        if not self.population.population:
+            raise RuntimeError("Population is empty — cannot start simulation.")
         self.population.population[0].state = State.INFECTED
 
         for day in range(1, self.duration + 1):
             self.simulate_day(day)
 
-        self.runtime_ms = (time.time() - start_time) * 1000
+        # Converts runtime to ms
+        self.runtime_ms = (time.time() - start) * 1000
 
-        # Export and log
-        summary_file = self.export_run_data()
+        # Export data, log run, and plot results
+        summary_file, config_file = self.export_run_data()
         self.log_run(summary_file)
-        self.plot_curve(save_path = f"{self.RESULTS_DIR}/run_{self.run_id}_curve.png")
+        self.plot_curve(f"{self.RESULTS_DIR}run_{self.run_id}_curve.png")
 
     def simulate_day(self, day):
-        """ Simulate one day of infection spread and interventions."""
+        """ Simulate a single day of spread, interventions, and transitions."""
 
         prev_states = [p.state for p in self.population.population]
 
-        # Apply interventions
+        # Apply interventions and update states
         self.intervention.apply_vaccine(day)
         self.intervention.apply_social_distancing(day)
         self.intervention.apply_quarantine(day)
-
-        # Update population
         self.population.update(self.virus, day)
 
-        # Record counts
+        # Record daily totals
         counts = Counter(p.state for p in self.population.population)
-        ordered = {
-            "S": counts.get(State.SUSCEPTIBLE, 0),
-            "E": counts.get(State.EXPOSED, 0),
-            "I": counts.get(State.INFECTED, 0),
-            "R": counts.get(State.RECOVERED, 0)
-        }
+        ordered = {s.name[0]: counts.get(s, 0) for s in State}
         self.history.append(ordered)
 
-        # Track state transitions
-        for idx, person in enumerate(self.population.population):
-            old, new = prev_states[idx], person.state
+        # Track state changes
+        for i, person in enumerate(self.population.population):
+            old, new = prev_states[i], person.state
             if old != new:
                 self.event_log.append({
                     "day": day,
-                    "PersonID": getattr(person, "id", idx),
+                    "PersonID": getattr(person, "id", i),
                     "Age": getattr(person, "age", "Unknown"),
                     "AgeGroup": getattr(person, "age_group", "Unknown"),
                     "Event": f"{old.name} → {new.name}"
                 })
 
     def export_run_data(self):
-        """ Export simulation results to CSV/JSON."""
+        """ Export timeseries, events, summary, and config data."""
 
         base = os.path.join(self.RESULTS_DIR, f"run_{self.run_id}")
         files = {
@@ -131,27 +124,26 @@ class Simulation:
             "events": f"{base}_events.csv",
             "summary": f"{base}_summary.json",
             "config": f"{base}_config.json",
-            "figure": f"{base}_curve.png"
         }
 
-        # --- Timeseries ---
-        with open(files["timeseries"], "w", newline = "") as f:
+        # Create timeseries CSV
+        with open(files["timeseries"], "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["Day", "Susceptible", "Exposed", "Infected", "Recovered"])
-            for day, counts in enumerate(self.history, 1):
-                writer.writerow([day, counts["S"], counts["E"], counts["I"], counts["R"]])
+            for day, c in enumerate(self.history, 1):
+                writer.writerow([day, c["S"], c["E"], c["I"], c["R"]])
 
-        # --- Events ---
-        with open(files["events"], "w", newline = "", encoding = "utf-8") as f:
+        # Creates events CSV
+        with open(files["events"], "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(["Day", "PersonID", "Age", "AgeGroup", "Event"])
-            for e in self.event_log:
+            for ev in self.event_log:
                 writer.writerow([
-                    e.get("day", ""), e.get("PersonID", ""),
-                    e.get("Age", ""), e.get("AgeGroup", ""), e.get("Event", "")
+                    ev.get("day", ""), ev.get("PersonID", ""), ev.get("Age", ""),
+                    ev.get("AgeGroup", ""), ev.get("Event", "")
                 ])
 
-        # --- Summary ---
+        # Creates summary JSON
         final_counts = self.history[-1] if self.history else {"S": 0, "E": 0, "I": 0, "R": 0}
         total_counts = {k: sum(day[k] for day in self.history) for k in final_counts}
         total_infections = total_counts["I"]
@@ -168,50 +160,43 @@ class Simulation:
             "Runtime_ms": round(self.runtime_ms, 4),
             "Timestamp": datetime.now().isoformat(),
             "FinalState": final_counts,
-            "AgeDistribution": dict(age_dist),
             "TotalCounts": total_counts,
-            "Throughput": round(throughput, 4)
+            "Throughput": round(throughput, 4),
+            "AgeDistribution": dict(age_dist),
         }
-
         with open(files["summary"], "w") as f:
-            json.dump(summary, f, indent=4)
+            json.dump(summary, f, indent = 4)
 
-        # --- Config ---
+        # Crestes config JSON
         with open(files["config"], "w") as f:
-            json.dump(self.config, f, indent=4)
+            json.dump(self.config, f, indent = 4)
 
         print("Data exported:")
-        for label, path in files.items():
+        for name, path in files.items():
             print(f"   ├─ {path}")
-
         return files["summary"], files["config"]
 
     def log_run(self, summary_file):
-        """ Record this run in a persistent CSV log."""
+        """ Append this run to the cumulative results log."""
 
-        log_path = os.path.join(self.RESULTS_DIR, "log.csv")
-        new_file = not os.path.exists(log_path)
-
-        with open(log_path, "a", newline = "") as f:
+        log_file = os.path.join(self.RESULTS_DIR, "log.csv")
+        new_file = not os.path.exists(log_file)
+        with open(log_file, "a", newline = "") as f:
             writer = csv.writer(f)
             if new_file:
-                writer.writerow(["RunID", "Purpose", "ParametersChanged", "Runtime (ms)", "SummaryFile"])
+                writer.writerow(["Run ID", "Purpose", "Parameters Changed", "Duration (ms)", "Data File"])
             writer.writerow([self.run_id, self.purpose, self.params_changed, round(self.runtime_ms, 4), summary_file])
-
-        print(f"Run logged → {log_path}")
+        print(f"Logged Run {self.run_id} → {log_file}")
 
     def plot_curve(self, save_path = None):
-        """ Plot and save epidemic progression curves."""
+        """ Plot epidemic curve and optionally save to file."""
 
         if not self.history:
-            print("[WARN] No data to plot.")
+            print("Warning: No history to plot.")
             return
 
         days = range(1, len(self.history) + 1)
-        S = [h["S"] for h in self.history]
-        E = [h["E"] for h in self.history]
-        I = [h["I"] for h in self.history]
-        R = [h["R"] for h in self.history]
+        S, E, I, R = ([h[k] for h in self.history] for k in ["S", "E", "I", "R"])
 
         plt.figure(figsize = (10, 6))
         plt.plot(days, S, label = "Susceptible")
@@ -220,19 +205,27 @@ class Simulation:
         plt.plot(days, R, label = "Recovered")
         plt.title(f"Epidemic Simulation: {self.virus.name}")
         plt.xlabel("Day")
-        plt.ylabel("Population")
+        plt.ylabel("Individuals")
         plt.legend()
         plt.grid(True)
 
         if save_path:
             plt.savefig(save_path)
-            print(f"Plot saved → {save_path}")
+            print(f"Figure saved → {save_path}")
         plt.close()
 
 if __name__ == "__main__":
+    """ Load config, create a Simulation, and run it."""
 
-    # Loads config file and calls the simulation run function
-    with open("Simidemic/Simulator/config.json") as f:
-        config = json.load(f)
-    sim = Simulation(config)
-    sim.run()
+    # Safely open config file and start simulation
+    try:
+        with open("Simidemic/Simulator/config.json") as f:
+            config = json.load(f)
+        sim = Simulation(config)
+        sim.run()
+    except FileNotFoundError:
+        print("Error: Config file not found: 'config.json'")
+    except json.JSONDecodeError:
+        print("Error: Config file is not valid JSON.")
+    except Exception as e:
+        print(f"Error: Simulation failed: {e}")

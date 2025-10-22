@@ -15,7 +15,7 @@ class Population:
         self.risk_factors = risk_factors
         self.population = [Person() for _ in range(size)]
         
-        # Create a small-world network for realistic contacts
+        # Creates a small-world network for realistic contacts
         self.network = nx.watts_strogatz_graph(size, avg_degree, rewire_prob)
 
         # Base contact rate (modifiable by social distancing)
@@ -39,7 +39,7 @@ class Population:
             if person.isolated or person.state == State.RECOVERED:
                 continue
 
-            # Infection spread (S → E)
+            # Controls infection spread and will control Susceptible to Exposed
             if person.state == State.SUSCEPTIBLE:
                 neighbors = [self.population[n] for n in self.network.neighbors(person.id)]
                 infected_neighbors = [n for n in neighbors if n.state == State.INFECTED]
@@ -47,21 +47,21 @@ class Population:
                 if infected_neighbors:
                     infection_prob = virus.infect_rate * self.contact_reduction
                     
-                    # Adjust based on age/risk group (if config defines it)
+                    # Adjust infection rates based on risk groups
                     if self.risk_factors:
                         risk_factor = self.risk_factors.get(person.age_group, 1.0)
                         infection_prob *= risk_factor
-                    
+
                     if random.random() < infection_prob:
                         newly_exposed.append(person)
 
-            # Exposed → Infected (after incubation period)
+            # Controls infection spread and will control Exposed to Infected
             elif person.state == State.EXPOSED:
                 person.days_exposed += 1
                 if person.days_exposed >= virus.infection_time:
                     newly_infected.append(person)
 
-            # Infected → Recovered (based on cure rate)
+            # Recovers person based on cure rate and will control Infected to Recovered
             elif person.state == State.INFECTED:
                 person.days_infected += 1
                 if random.random() < virus.cure_rate:
