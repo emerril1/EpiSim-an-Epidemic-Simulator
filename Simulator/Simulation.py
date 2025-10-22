@@ -24,7 +24,7 @@ class Simulation:
         virus_cfg = config.get("virus", {})
         pop_cfg = config.get("population", {})
 
-        self.duration = sim_cfg.get("duration", 50)
+        self.duration = sim_cfg.get("duration", 60)
         self.purpose = sim_cfg.get("purpose", "Baseline")
         self.params_changed = sim_cfg.get("params_changed", "All defaults")
 
@@ -33,10 +33,10 @@ class Simulation:
 
         # Initializes the Virus, Population, and Intervention parameters from the config
         self.virus = Virus(
-            name = virus_cfg.get("name", "UnknownVirus"),
-            infect_rate = virus_cfg.get("infect_rate", 0.5),
-            cure_rate = virus_cfg.get("cure_rate", 0.1),
-            infection_time = virus_cfg.get("infection_time", 3),
+            name = virus_cfg.get("name", "T-Virus"),
+            infect_rate = virus_cfg.get("infect_rate", 0.7),
+            cure_rate = virus_cfg.get("cure_rate", 0.05),
+            infection_time = virus_cfg.get("infection_time", 2),
         )
         self.population = Population(
             size = pop_cfg.get("size", 100),
