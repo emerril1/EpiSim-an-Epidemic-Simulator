@@ -8,7 +8,6 @@ from Virus import Virus
 from Intervention import Intervention
 from EnumeratedTypes import State
 
-
 class Simulation:
     """ Runs the epidemic simulation, logs all data, and exports summary statistics."""
 
