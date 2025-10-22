@@ -2,8 +2,8 @@
   "simulation": { 
     "duration": 60, 
     "initial_infected": 1,
-    "purpose": "Quarantine Effectiveness at 50% Coverage",
-    "params_changed": "quarantine: true, coverage: 0.5"
+    "purpose": "Baseline",
+    "params_changed": "All defaults"
     },
   "population": { 
     "size": 100, 
@@ -33,8 +33,8 @@
       "start_day": 20
     },
     "quarantine": {
-      "enabled": true,
-      "coverage": 0.9,
+      "enabled": false,
+      "coverage": 0.5,
       "start_day": 20
       }
     }
