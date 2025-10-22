@@ -35,15 +35,15 @@ class Population:
 
         for person in self.population:
 
-            # Skip isolated or recovered individuals
-            if person.isolated or person.state == State.RECOVERED:
+            # Skip recovered only
+            if person.state == State.RECOVERED:
                 continue
 
             # Controls infection spread and will control Susceptible to Exposed
             if person.state == State.SUSCEPTIBLE:
                 neighbors = [self.population[n] for n in self.network.neighbors(person.id)]
-                infected_neighbors = [n for n in neighbors if n.state == State.INFECTED]
-                
+                infected_neighbors = [n for n in neighbors if n.state == State.INFECTED and not n.isolated]
+                            
                 if infected_neighbors:
                     infection_prob = virus.infect_rate * self.contact_reduction
                     
@@ -63,6 +63,8 @@ class Population:
 
             # Recovers person based on cure rate and will control Infected to Recovered
             elif person.state == State.INFECTED:
+                
+                # Allow isolated people to recover, but they cannot spread
                 person.days_infected += 1
                 if random.random() < virus.cure_rate:
                     newly_recovered.append(person)

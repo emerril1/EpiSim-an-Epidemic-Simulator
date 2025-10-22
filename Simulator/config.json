@@ -1,12 +1,12 @@
 {
   "simulation": { 
-    "duration": 50, 
+    "duration": 60, 
     "initial_infected": 1,
-    "purpose": "Baseline",
-    "params_changed": "Default"
+    "purpose": "Quarantine Effectiveness at 50% Coverage",
+    "params_changed": "quarantine: true, coverage: 0.5"
     },
   "population": { 
-    "size": 50, 
+    "size": 100, 
     "avg_degree": 6, 
     "rewire_prob": 0.1,
     "risk_factors": {
@@ -24,18 +24,18 @@
   "intervention": {
     "social_distancing": {
       "enabled": false,
-      "reduction_factor": 0.3,
-      "start_day": 5
+      "reduction_factor": 0.25,
+      "start_day": 20
       },
     "vaccination": {
-      "enabled": true,
+      "enabled": false,
       "coverage": 0.5,
-      "start_day": 1
+      "start_day": 20
     },
     "quarantine": {
-      "enabled": false,
-      "coverage": 1,
-      "start_day": 1
+      "enabled": true,
+      "coverage": 0.9,
+      "start_day": 20
       }
     }
   }
