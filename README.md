@@ -17,14 +17,14 @@ By focusing on a simplified virus model, this simulation aims to provide insight
 
 # Project Status
 
-Completion of the main simulator and two models is all but done. Main functionality is provided in soruce code with proper simulation and infection logic. That also includes the main documentation for each clas and function. Work is beginning on some new parts to make the simulator more complete and interactive. 
+The epidemic simulator is now feature complete and more realistic than before. All main systems such as population modeling, infection logic, and interventions, are fully implemented and documented. The simulator now supports external configuration files for setting parameters such as population size, infection rate, cure rate, and simulation duration, removing the need for hardcoded values.
 
-These changes include:
-* User Input Options – The simulator will be updated to allow users to configure key parameters (such as population size, infection rate, cure rate, and simulation duration) directly, instead of requiring hardcoded values. This will make the tool more flexible and accessible.
-* New Intervention Strategy: Social Distancing – In addition to the existing Vaccine and Quarantine strategies, Social Distancing will be introduced. This intervention will modify the population contact graph to reduce interactions, thereby simulating reduced transmission.
-* Visualization with Graphs – A visual output will be added using matplotlib.pyplot to display the compartments (Susceptible, Infected, Recovered) over time. This graph will provide a clear epidemic curve and make the progression of the simulation easier to interpret.
+Recent updates have introduced major improvements to both accuracy and usability:
+* Expanded Interventions: Vaccination, quarantine, and a new social distancing strategy using the adjust_contact_rate function let users test multiple outbreak control methods.
+* Enhanced Population Modeling: A small world network and new helper functions like assign_age_group and update provide more lifelike human interaction patterns and age-based effects.
+* Data and Visualization: The simulator now exports detailed time series, event logs, and summary reports, with visual graphs showing epidemic curves and intervention impacts.
 
-No changes have been made to the original project proposal. The overall structure of the system and its intended goals remain consistent with the original design, with these additions serving as natural extensions to improve usability and analysis.
+These additions build on the original design without changing its goals. The result is a more configurable, data-rich, and realistic simulator that better models how an epidemic spreads and responds to interventions.
 
 # Installation Instructions
 
@@ -53,24 +53,30 @@ This ensures the simulation has all the necessary dependencies to run properly, 
 
 # Usage
 
-You can define all key parameters in a config.json file located in the project root. This file allows you to specify all adjustable parameters, population size, virus characteristics, intervention strategies, and simulation duration without editing the source code. After making sure the config.json file is update and in the correct directory, then simulation can be run through any enviroment/IDE of user's choice.
+All key parameters for the simulator are defined in the config.json file located in the project root. This file allows users to adjust settings such as population size, virus characteristics, intervention strategies, and simulation duration without changing the source code. Each value can be modified to test different outbreak conditions and intervention effects.
 
-Results will be printed after each day, e.g.:
+Once the configuration file is updated and placed in the correct directory, the simulation can be run from any environment or IDE that supports Python. The simulator will automatically read the configuration, initialize all components, and begin execution.
 
-Day 10: {'S': 12, 'E': 4, 'I': 29, 'R': 5}
+After completion, several output files are generated automatically. These include:
+* timeseries.csv – Daily counts of Susceptible, Exposed, Infected, and Recovered individuals.
+* events.csv – Detailed logs of individual transitions, including infection and recovery events.
+* summary.json – Key statistics and metadata for the entire simulation run.
+* curve.png - Detailed plot curve of each compartmen of the SEIR model.
+
+These files provide a complete record of the simulation’s behavior and can be used for further analysis or reporting.
 
 # Architecture Overview
 
-The main components of the simulator consist of six classes and a main program. The classes include: EnumeratedTypes, Virus, Person, Intervention, Population, and Simulation.
+The simulator is made up of six main classes and a main program: EnumeratedTypes, Virus, Person, Intervention, Population, and Simulation.
 
-The Virus class stores information about the virus, such as its name, infection rate, and cure rate. The Virus class also now stores a variable that gives the time till infection (e.g. how many days it takes an exposed person to become infected).
+The Virus class stores disease details such as infection rate, cure rate, and the time it takes for exposed individuals to become infectious.
 
-The Person class represents an individual in the population. Each person has a unique ID and a health state, along with functions to become infected or cured. Every person begins in the Susceptible state at the start of a simulation.
+The Person class represents an individual with an ID, health state, and age group. Each person begins as Susceptible and can transition between states through functions that handle exposure, infection, recovery, and quarantine.
 
-The Intervention class defines the execute function, which applies user-selected interventions by modifying the population’s contact graph to simulate different scenarios (e.g. social distancing).
+The Intervention class manages the different public health strategies: vaccination, quarantine, and social distancing. Each intervention has its own start day, coverage, and reduction settings. When triggered, these functions adjust population behavior, such as isolating infected people or reducing contact rates.
 
-The Population class manages a collection of Person objects and generates a contact graph that models interactions. This graph ensures realistic infection dynamics by implementing a small world network that represents real-world contact patterns and infection spread. It includes two key functions: one to generate the graph and another to retrieve the contacts of a given person (node).
+The Population class controls all individuals and their interactions through a small-world network that mimics real social contact patterns. Key functions include assign_age_group, adjust_contact_rate, and update, which handle infection spread and recovery each day.
 
-The Simulation class coordinates the epidemic process. It contains methods to advance the simulation step by step, run the simulation over a set period, and track statistics (such as susceptible, exposed, infected, and recovered counts). These functions are integrated within the main program, which drives the simulation and records results.
+The Simulation class coordinates the entire process, running the epidemic step by step, applying interventions, and exporting time series, event logs, and summary reports.
 
-Overall, the architecture of the project closely follows the original UML class and sequence diagrams. The only major modification is the addition of the EnumeratedTypes class, which was separated out to improve modularity. This adjustment also shifted some of the relationships between classes compared to the original UML design.
+Lastly, EnumeratedTypes defines all possible health states, improving organization and readability. Overall, the architecture remains consistent with the original design but now includes more realistic modeling, better configurability, and improved data tracking.
