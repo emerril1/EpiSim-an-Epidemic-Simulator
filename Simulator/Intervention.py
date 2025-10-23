@@ -32,6 +32,7 @@ class Intervention:
                 p.vaccinated = True
                 p.state = State.RECOVERED
 
+            # Save vaccination status
             self.vaccine_applied = True
         except Exception as e:
             print(f"Error: Vaccination failed: {e}")
@@ -56,6 +57,7 @@ class Intervention:
                 for p in isolated:
                     p.isolated = True
             
+            # Save quarantine status
             self.quarantine_active = True
         except Exception as e:
             print(f"Error: Quarantine failed: {e}")
@@ -72,6 +74,8 @@ class Intervention:
             # Apply reduction factor to contact rate of population network
             reduction = cfg.get("reduction_factor", 0.25)
             self.population.adjust_contact_rate(reduction)
+
+            # Save social distancing status
             self.social_distancing_active = True
         except Exception as e:
             print(f"Error: Social distancing failed: {e}")

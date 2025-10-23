@@ -43,6 +43,7 @@ class Person:
     def expose(self, time):
         """ Expose a susceptible person to the virus (S → E)."""
 
+        # Only expose if susceptible
         if self.state == State.SUSCEPTIBLE:
             self.state = State.EXPOSED
             self.exposed_time = time
@@ -51,6 +52,7 @@ class Person:
     def infect(self, time):
         """ Infect an exposed person after incubation (E → I)."""
 
+        # Only infect if exposed
         if self.state == State.EXPOSED:
             self.state = State.INFECTED
             self.infected_time = time
@@ -60,6 +62,7 @@ class Person:
     def recover(self):
         """ Recover an infected person (I → R)."""
 
+        # only recover if infected
         if self.state == State.INFECTED:
             self.state = State.RECOVERED
             self.just_recovered = True

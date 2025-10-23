@@ -24,6 +24,7 @@ class Population:
     def adjust_contact_rate(self, reduction_factor):
         """ Reduce contact rate due to social distancing."""
 
+        # Update contact rate based on social distancing reduction factor (if applicable)
         self.contact_reduction = max(0.0, 1.0 - reduction_factor)
 
     def update(self, virus, day):

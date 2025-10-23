@@ -1,0 +1,34 @@
+{
+    "RunID": "011",
+    "Purpose": "All Interventions",
+    "ParametersChanged": "vaccination: enabled: true, coverage: 0.5, social_distancing: enabled: true, reduction_factor: 0.25, quarantine: enabled: true, coverage: 0.5",
+    "Virus": "T-Virus",
+    "PopulationSize": 100,
+    "DurationDays": 60,
+    "Runtime_ms": 2.3036,
+    "Timestamp": "2025-10-23T01:10:03.349758",
+    "FinalState": {
+        "S": 0,
+        "E": 0,
+        "I": 5,
+        "R": 95
+    },
+    "TotalCounts": {
+        "S": 983,
+        "E": 196,
+        "I": 1193,
+        "R": 3628
+    },
+    "AvgCounts": {
+        "S": 16.383333333333333,
+        "E": 3.2666666666666666,
+        "I": 19.883333333333333,
+        "R": 60.46666666666667
+    },
+    "Throughput": 517.885,
+    "AgeDistribution": {
+        "senior": 34,
+        "child": 16,
+        "adult": 50
+    }
+}

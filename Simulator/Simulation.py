@@ -59,7 +59,7 @@ class Simulation:
         if not os.path.exists(log_file):
             return "001"
 
-        with open(log_file, "r", newline="") as f:
+        with open(log_file, "r", newline = "") as f:
             rows = list(csv.reader(f))
             last = next((r for r in reversed(rows) if r and r[0].isdigit()), None)
             return f"{int(last[0]) + 1:03d}" if last else "001"
@@ -126,14 +126,14 @@ class Simulation:
         }
 
         # Create timeseries CSV
-        with open(files["timeseries"], "w", newline="") as f:
+        with open(files["timeseries"], "w", newline = "") as f:
             writer = csv.writer(f)
             writer.writerow(["Day", "Susceptible", "Exposed", "Infected", "Recovered"])
             for day, c in enumerate(self.history, 1):
                 writer.writerow([day, c["S"], c["E"], c["I"], c["R"]])
 
         # Creates events CSV
-        with open(files["events"], "w", newline="", encoding="utf-8") as f:
+        with open(files["events"], "w", newline = "", encoding = "utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(["Day", "PersonID", "Age", "AgeGroup", "Event"])
             for ev in self.event_log:
@@ -142,13 +142,14 @@ class Simulation:
                     ev.get("AgeGroup", ""), ev.get("Event", "")
                 ])
 
-        # Creates summary JSON
+        # Calculates various metrics
         final_counts = self.history[-1] if self.history else {"S": 0, "E": 0, "I": 0, "R": 0}
         total_counts = {k: sum(day[k] for day in self.history) for k in final_counts}
-        total_infections = total_counts["I"]
-        throughput = total_infections / self.runtime_ms if self.runtime_ms > 0 else 0
+        avg_counts = {k: sum(day[k] for day in self.history) / self.duration for k in final_counts}
+        throughput = total_counts["I"] / self.runtime_ms if self.runtime_ms > 0 else 0
         age_dist = Counter(p.age_group for p in self.population.population)
 
+        # Creates summary JSON
         summary = {
             "RunID": self.run_id,
             "Purpose": self.purpose,
@@ -160,8 +161,9 @@ class Simulation:
             "Timestamp": datetime.now().isoformat(),
             "FinalState": final_counts,
             "TotalCounts": total_counts,
+            "AvgCounts": avg_counts,
             "Throughput": round(throughput, 4),
-            "AgeDistribution": dict(age_dist),
+            "AgeDistribution": dict(age_dist)
         }
         with open(files["summary"], "w") as f:
             json.dump(summary, f, indent = 4)
@@ -208,6 +210,7 @@ class Simulation:
         plt.legend()
         plt.grid(True)
 
+        # Saves figure to results path
         if save_path:
             plt.savefig(save_path)
             print(f"Figure saved → {save_path}")

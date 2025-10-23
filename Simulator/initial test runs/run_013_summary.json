@@ -1,0 +1,34 @@
+{
+    "RunID": "013",
+    "Purpose": "Stress Test",
+    "ParametersChanged": "population: size: 10000, simulation: duration: 365",
+    "Virus": "T-Virus",
+    "PopulationSize": 10000,
+    "DurationDays": 365,
+    "Runtime_ms": 1186.2726,
+    "Timestamp": "2025-10-23T01:13:30.744167",
+    "FinalState": {
+        "S": 0,
+        "E": 0,
+        "I": 0,
+        "R": 10000
+    },
+    "TotalCounts": {
+        "S": 258628,
+        "E": 19998,
+        "I": 200521,
+        "R": 3170853
+    },
+    "AvgCounts": {
+        "S": 708.5698630136986,
+        "E": 54.78904109589041,
+        "I": 549.3726027397261,
+        "R": 8687.268493150685
+    },
+    "Throughput": 169.0345,
+    "AgeDistribution": {
+        "senior": 3620,
+        "adult": 4648,
+        "child": 1732
+    }
+}

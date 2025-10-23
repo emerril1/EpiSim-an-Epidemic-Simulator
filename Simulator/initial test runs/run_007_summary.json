@@ -1,0 +1,34 @@
+{
+    "RunID": "007",
+    "Purpose": "Social Distancing Effect at 75% Reduction Factor",
+    "ParametersChanged": "social_distancing: enabled: true, reduction_factor: 0.75",
+    "Virus": "T-Virus",
+    "PopulationSize": 100,
+    "DurationDays": 60,
+    "Runtime_ms": 2.4121,
+    "Timestamp": "2025-10-23T01:06:56.549311",
+    "FinalState": {
+        "S": 0,
+        "E": 0,
+        "I": 8,
+        "R": 92
+    },
+    "TotalCounts": {
+        "S": 966,
+        "E": 198,
+        "I": 2006,
+        "R": 2830
+    },
+    "AvgCounts": {
+        "S": 16.1,
+        "E": 3.3,
+        "I": 33.43333333333333,
+        "R": 47.166666666666664
+    },
+    "Throughput": 831.6471,
+    "AgeDistribution": {
+        "child": 20,
+        "adult": 43,
+        "senior": 37
+    }
+}

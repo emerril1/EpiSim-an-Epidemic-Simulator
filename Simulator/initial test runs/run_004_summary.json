@@ -1,0 +1,34 @@
+{
+    "RunID": "004",
+    "Purpose": "Vaccine Effect at 90% Coverage",
+    "ParametersChanged": "vaccine: enabled: true, coverage: 0.9",
+    "Virus": "T-Virus",
+    "PopulationSize": 100,
+    "DurationDays": 60,
+    "Runtime_ms": 2.239,
+    "Timestamp": "2025-10-23T01:05:30.789453",
+    "FinalState": {
+        "S": 1,
+        "E": 0,
+        "I": 1,
+        "R": 98
+    },
+    "TotalCounts": {
+        "S": 1185,
+        "E": 176,
+        "I": 610,
+        "R": 4029
+    },
+    "AvgCounts": {
+        "S": 19.75,
+        "E": 2.933333333333333,
+        "I": 10.166666666666666,
+        "R": 67.15
+    },
+    "Throughput": 272.4444,
+    "AgeDistribution": {
+        "adult": 38,
+        "senior": 45,
+        "child": 17
+    }
+}

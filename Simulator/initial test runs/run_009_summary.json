@@ -1,0 +1,34 @@
+{
+    "RunID": "009",
+    "Purpose": "Quarantine Effect at 70% Coverage",
+    "ParametersChanged": "quarantine: enabled: true, coverage: 0.7",
+    "Virus": "T-Virus",
+    "PopulationSize": 100,
+    "DurationDays": 60,
+    "Runtime_ms": 2.3487,
+    "Timestamp": "2025-10-23T01:08:11.611176",
+    "FinalState": {
+        "S": 0,
+        "E": 0,
+        "I": 8,
+        "R": 92
+    },
+    "TotalCounts": {
+        "S": 832,
+        "E": 198,
+        "I": 1832,
+        "R": 3138
+    },
+    "AvgCounts": {
+        "S": 13.866666666666667,
+        "E": 3.3,
+        "I": 30.533333333333335,
+        "R": 52.3
+    },
+    "Throughput": 780.0188,
+    "AgeDistribution": {
+        "adult": 42,
+        "senior": 33,
+        "child": 25
+    }
+}

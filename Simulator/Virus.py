@@ -9,5 +9,3 @@ class Virus:
         self.infect_rate = infect_rate
         self.cure_rate = cure_rate
         self.infection_time = infection_time
-
-    

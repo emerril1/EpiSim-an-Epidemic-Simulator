@@ -1,0 +1,41 @@
+{
+    "simulation": {
+        "duration": 60,
+        "initial_infected": 1,
+        "purpose": "Quarantine Effect at 90% Coverage",
+        "params_changed": "quarantine: enabled: true, coverage: 0.9"
+    },
+    "population": {
+        "size": 100,
+        "avg_degree": 6,
+        "rewire_prob": 0.1,
+        "risk_factors": {
+            "child": 0.5,
+            "adult": 1.0,
+            "senior": 1.6
+        }
+    },
+    "virus": {
+        "name": "T-Virus",
+        "infect_rate": 0.7,
+        "cure_rate": 0.05,
+        "infection_time": 2
+    },
+    "intervention": {
+        "social_distancing": {
+            "enabled": false,
+            "reduction_factor": 0.25,
+            "start_day": 20
+        },
+        "vaccination": {
+            "enabled": false,
+            "coverage": 0.5,
+            "start_day": 20
+        },
+        "quarantine": {
+            "enabled": true,
+            "coverage": 0.9,
+            "start_day": 20
+        }
+    }
+}

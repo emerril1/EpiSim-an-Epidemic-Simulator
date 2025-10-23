@@ -1,0 +1,14 @@
+Run ID,Purpose,Parameters Changed,Duration (ms),Data File
+001,Baseline,All defaults,2.3441,Simidemic/Simulator/results/run_001_summary.json
+002,Vaccine Effect at 50% Coverage,"vaccine: enabled: true, coverage: 0.5",2.177,Simidemic/Simulator/results/run_002_summary.json
+003,Vaccine Effect at 70% Coverage,"vaccine: enabled: true, coverage: 0.7",2.2798,Simidemic/Simulator/results/run_003_summary.json
+004,Vaccine Effect at 90% Coverage,"vaccine: enabled: true, coverage: 0.9",2.239,Simidemic/Simulator/results/run_004_summary.json
+005,Social Distancing Effect at 25% Reduction Factor,"social_distancing: enabled: true, reduction_factor: 0.25",2.1918,Simidemic/Simulator/results/run_005_summary.json
+006,Social Distancing Effect at 50% Reduction Factor,"social_distancing: enabled: true, reduction_factor: 0.5",2.4736,Simidemic/Simulator/results/run_006_summary.json
+007,Social Distancing Effect at 75% Reduction Factor,"social_distancing: enabled: true, reduction_factor: 0.75",2.4121,Simidemic/Simulator/results/run_007_summary.json
+008,Quarantine Effect at 50% Coverage,"quarantine: enabled: true, coverage: 0.5",3.0434,Simidemic/Simulator/results/run_008_summary.json
+009,Quarantine Effect at 70% Coverage,"quarantine: enabled: true, coverage: 0.7",2.3487,Simidemic/Simulator/results/run_009_summary.json
+010,Quarantine Effect at 90% Coverage,"quarantine: enabled: true, coverage: 0.9",2.5971,Simidemic/Simulator/results/run_010_summary.json
+011,All Interventions,"vaccination: enabled: true, coverage: 0.5, social_distancing: enabled: true, reduction_factor: 0.25, quarantine: enabled: true, coverage: 0.5",2.3036,Simidemic/Simulator/results/run_011_summary.json
+012,Stress Test,"population: size: 10000, simulation: duration: 365",1359.8616,Simidemic/Simulator/results/run_012_summary.json
+013,Stress Test,"population: size: 10000, simulation: duration: 365",1186.2726,Simidemic/Simulator/results/run_013_summary.json
